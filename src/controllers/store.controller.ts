@@ -47,6 +47,8 @@ storeController.getLogin = (req: Request, res: Response) => {
 storeController.processSignup = async (req: AdminRequest, res: Response) => {
   try {
     console.log('processSignup');
+    // console.log("body:", req.body);
+    // res.send("DONE");
     const file = req.file;
     if (!file) throw new Errors(HttpCode.BAD_REQUEST, Message.SOMETHING_WENT_WRONG);
 
@@ -144,7 +146,7 @@ storeController.checkAuthSession = async (req: AdminRequest, res: Response) => {
   }
 };
 
-storeController.verifyRestaurant = (
+storeController.verifyStore = (
   req: AdminRequest,
   res: Response,
   next: NextFunction

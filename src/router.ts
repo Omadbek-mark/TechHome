@@ -9,8 +9,8 @@ import { verify } from "jsonwebtoken";
 
 /** Member */
 router.get(
-  "/member/restaurant",
-  memberController.getRestaurant
+  "/member/store",
+  memberController.getStore
 );
 router.post('/member/login', memberController.login);
 router.post('/member/signup', memberController.signup);

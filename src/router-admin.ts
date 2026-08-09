@@ -4,7 +4,7 @@ import storeController from "./controllers/store.controller";
 import productController from "./controllers/product.controller"; 
 import  makeUploader from "./libs/utils/uploader";
 
-/** Restaurant */
+/** Store */
 routerAdmin.get('/', storeController.goHome);
 routerAdmin
   .get('/login', storeController.getLogin)
@@ -20,28 +20,28 @@ routerAdmin.get('/check-me', storeController.checkAuthSession);
 /** Product */
 routerAdmin.get(
   '/product/all',
-  storeController.verifyRestaurant,
+  storeController.verifyStore,
   productController.getAllProducts
 );
 routerAdmin.post(
   "/product/create",
-  storeController.verifyRestaurant,
+  storeController.verifyStore,
   makeUploader("products").array("productImages", 5),
   productController.createNewProduct);
 routerAdmin.post(
   "/product/:id",
-  storeController.verifyRestaurant,
+  storeController.verifyStore,
   productController.updateChosenProduct
 );
 
 
 /** User */
 routerAdmin.get('/user/all',
-  storeController.verifyRestaurant,
+  storeController.verifyStore,
   storeController.getUsers
 );
 routerAdmin.post('/user/edit',
-  storeController.verifyRestaurant,
+  storeController.verifyStore,
   storeController.updateChosenUser
 );
 

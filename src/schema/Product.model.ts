@@ -1,9 +1,10 @@
 import mongoose, { Schema } from "mongoose";
 import {
-  ProductCollection,
-  ProductSize,
+  ProductCategory,
+  WarrantyYears,
   ProductStatus,
-  ProductVolume,
+  InstallmentMonths,
+  EnergyClass
 } from "../libs/enums/product.enum";
 
 const productSchema = new Schema(
@@ -14,9 +15,9 @@ const productSchema = new Schema(
       default: ProductStatus.PAUSE
     },
 
-    productCollection: {
+    productCategory: {
       type: String,
-      enum: ProductCollection,
+      enum: ProductCategory,
       required: true,
     },
 
@@ -35,16 +36,24 @@ const productSchema = new Schema(
       required: true,
     },
 
-    productSize: {
-      type: String,
-      enum: ProductSize,
-      default: ProductSize.NORMAL
+    warrantyYears: {
+      type: Number,
+      enum: WarrantyYears,
+      default: WarrantyYears.ONE_YEAR,
+      required: true,
     },
 
-    productVolume: {
+    installmentMonths: {
       type: Number,
-      enum: ProductVolume,
-      default: ProductVolume.ONE
+      enum: InstallmentMonths,
+      default: InstallmentMonths.CASH_ONLY,
+      required: true,
+    },
+
+    energyClass: {
+      type: String,
+      enum: EnergyClass,
+      required: true,
     },
 
     productDesc: {
@@ -65,7 +74,7 @@ const productSchema = new Schema(
 );
 
 productSchema.index(
-  { productName: 1, productSize: 1, productVolume: 1 },
+  { productName: 1, energyClass: 1 },
   { unique: true }
 );
 export default mongoose.model("Product", productSchema);

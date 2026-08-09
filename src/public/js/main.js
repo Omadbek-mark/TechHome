@@ -1,1 +1,1 @@
-console.log("Basic frontend javascript file");
+console.log("TechHome admin — base frontend javascript file");

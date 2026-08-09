@@ -3,19 +3,27 @@
 <link rel="stylesheet" type="text/css" href="/css/login.css" />
 
 <body>
-  <form class="login-container" action="/admin/login" METHOD="POST">
+  <div class="navigation-menu">
+    <ul class="nav justify-content-center">
+      <li class="nav-item" style="cursor: pointer">
+        <a class="nav-link" href="/admin">Home</a>
+      </li>
+    </ul>
+  </div>
+
+  <form class="login-container" action="/admin/login" method="POST">
     <div class="login-frame">
       <div class="login-top">
         <span>Enter</span>
-        <div>Go back <a href="/admin" style="color: #6440fb">Home</a></div>
+        <div>Go back <a href="/admin" style="color: var(--accent-blue)">Home</a></div>
         <p>
           Not registered yet?
-          <a href="/admin/signup" style="color: #6440fb">Signup</a>
+          <a href="/admin/signup" style="color: var(--accent-blue)">Signup</a>
         </p>
       </div>
       <div class="login-input-frame">
         <div class="login-input-container">
-          <label>Restaurant *</label>
+          <label>Store *</label>
           <input
             type="text"
             name="memberNick"

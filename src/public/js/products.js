@@ -1,25 +1,14 @@
-console.log("Products frontend javascript file");
+console.log("TechHome admin — products frontend javascript file");
 
 $(function () {
-  $(".product-collection").on("change", () => {
-    const selectedValue = $(".product-collection").val();
-    if (selectedValue === "DRINK") {
-      $("#product-collection").hide();
-      $("#product-volume").show();
-    } else {
-      $("#product-volume").hide();
-      $("#product-collection").show();
-    }
-  });
-
   $("#process-btn").on("click", () => {
     $(".dish-container").slideToggle(500);
-    $("process-btn").css("display", "none");
+    $("#process-btn").css("display", "none");
   });
 
   $("#cancel-btn").on("click", () => {
     $(".dish-container").slideToggle(100);
-    $("process-btn").css("display", "none");
+    $("#process-btn").css("display", "inline-block");
   });
 
   $(".new-product-status").on("change", async function (e) {
@@ -38,24 +27,21 @@ $(function () {
       alert("Product update failed!");
     }
   });
-
 });
 
 function validateForm() {
   const productName = $(".product-name").val(),
    productPrice = $(".product-price").val(),
    productLeftCount = $(".product-left-count").val(),
-   productCollection = $(".product-collection").val(),
-   productDesc = $(".product-desc").val(),
-   productStatus = $(".product-status").val();
+   productCategory = $(".product-category").val(),
+   productDesc = $(".product-desc").val();
 
   if (
     productName === "" ||
     productPrice === "" ||
     productLeftCount === "" ||
-    productCollection === "" ||
-    productDesc === "" ||
-    productStatus === ""
+    productCategory === "" ||
+    productDesc === ""
   ) {
     alert("Please insert all details!");
     return false;
@@ -65,19 +51,19 @@ function validateForm() {
 function previewFileHandler(input, order) {
   const imgClassName = input.className;
 
-  const file = $(`.${imgClassName}`).get(0).files[0],
-   fileType = file['type'],
+  const file = $(`.${imgClassName}`).get(0).files[0];
+  if (!file) return;
+
+  const fileType = file["type"],
    validImageType = ["image/jpeg", "image/jpg", "image/png"];
 
   if (!validImageType.includes(fileType)) {
     alert("Please insert only jpeg, jpg and png");
   } else {
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function () {
-        $(`#image-section-${order}`).attr("src", reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+    const reader = new FileReader();
+    reader.onload = function () {
+      $(`#image-section-${order}`).attr("src", reader.result);
+    };
+    reader.readAsDataURL(file);
   }
 }

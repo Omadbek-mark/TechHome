@@ -3,86 +3,80 @@
 <link rel="stylesheet" type="text/css" href="/css/users.css" />
 
 <body>
-  <div class="users-container">
-    <% if(!member) { %>
-    <div class="navigation-menu">
-      <ul class="nav justify-content-center">
-        <li class="nav-item" style="cursor: pointer">
-          <a class="nav-link active" href="/admin/">Home</a>
-        </li>
-        <li class="nav-item" style="cursor: pointer">
-          <a class="nav-link" href="/admin/signup">SignUp</a>
-        </li>
-        <li class="nav-item" style="cursor: pointer">
-          <a class="nav-link" href="/admin/login">Login</a>
-        </li>
-      </ul>
-    </div>
-
-    <div class="users-frame" style="color: #dddddd">
-      <div class="board" style="font-size: 40px">Please login first!</div>
-    </div>
-
-    <% } else { %>
-    <div class="navigation-menu">
-      <ul class="nav justify-content-center">
-        <li class="nav-item" style="cursor: pointer">
-          <a class="nav-link active" href="/admin/">Home</a>
-        </li>
-        <li class="nav-item" style="cursor: pointer">
-          <a class="nav-link" href="/admin/product/all">Menu</a>
-        </li>
-        <li class="nav-item" style="cursor: pointer">
-          <a class="nav-link" href="/admin/user/all">Users</a>
-        </li>
-        <li
-          class="nav-item"
-          style="cursor: pointer"
-          onclick="return confirm('Do you really want to logout?')"
-        >
-          <a class="nav-link" href="/admin/logout">Logout</a>
-        </li>
-      </ul>
-    </div>
-
-    <div class="users-frame">
-      <div class="board">
-        <div class="user-table">
-          <span class="header-name" style="margin-bottom: 30px"
-            >All Users List</span
-          >
-          <table class="table table-hover table-sm">
-            <thead class="thead-light">
-              <tr class="thead-light">
-                <th scope="col">No</th>
-                <th scope="col">Name</th>
-                <th scope="col">Phone</th>
-                <th scope="col">Status</th>
-              </tr>
-            </thead>
-              <% users.map(function (value, index) { %>
-                <tbody style="background: white">
-              <td> <%= index + 1 %> </td>
-              <td> <%= value.memberNick %> </td>
-              <td> <%= value.memberPhone %> </td>
-              <td style="width: 13%">
-                <select class="spec-select member-status" id="<%= value._id %>">
-                  <option value="ACTIVE" <%= value.memberStatus === 'ACTIVE' ? 'selected': '' %> >ACTIVE</option>
-                  <option value="BLOCK" <%= value.memberStatus === 'BLOCK' ? 'selected': '' %> >BLOCK</option>
-                  <option value="DELETE" <%= value.memberStatus === 'DELETE' ? 'selected': '' %> >DELETE</option>
-                </select>
-              </td>
-            </tbody>
-              <% }) %>
-            
-          </table>
-        </div>
-      </div>
-    </div>
-    <% } %>
+  <% if(!member) { %>
+  <div class="navigation-menu">
+    <ul class="nav justify-content-center">
+      <li class="nav-item" style="cursor: pointer">
+        <a class="nav-link active" href="/admin/">Home</a>
+      </li>
+      <li class="nav-item" style="cursor: pointer">
+        <a class="nav-link" href="/admin/signup">Signup</a>
+      </li>
+      <li class="nav-item" style="cursor: pointer">
+        <a class="nav-link" href="/admin/login">Login</a>
+      </li>
+    </ul>
   </div>
 
-  <script type="text/javascript" src="/js/users.js"></script>
+  <div class="users-frame" style="color: var(--steel)">
+    <div class="board" style="font-size: 32px">Please login first!</div>
+  </div>
+
+  <% } else { %>
+  <div class="navigation-menu">
+    <ul class="nav justify-content-center">
+      <li class="nav-item" style="cursor: pointer">
+        <a class="nav-link " href="/admin/">Home</a>
+      </li>
+      <li class="nav-item" style="cursor: pointer">
+        <a class="nav-link" href="/admin/product/all">Products</a>
+      </li>
+      <li class="nav-item" style="cursor: pointer">
+        <a class="nav-link active" href="/admin/user/all">Users</a>
+      </li>
+      <li
+        class="nav-item"
+        style="cursor: pointer"
+        onclick="return confirm('Do you really want to logout?')"
+      >
+        <a class="nav-link" href="/admin/logout">Logout</a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="users-frame">
+    <div class="board">
+      <div class="section-eyebrow">CUSTOMERS</div>
+      <div class="user-table">
+        <span class="header-name">All customers</span>
+        <table class="table table-hover table-sm techhome-table">
+          <thead class="thead-light">
+            <tr>
+              <th scope="col">No</th>
+              <th scope="col">Name</th>
+              <th scope="col">Phone</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <% users.map(function (value, index) { %>
+          <tbody>
+            <td><%= index + 1 %></td>
+            <td><%= value.memberNick %></td>
+            <td><%= value.memberPhone %></td>
+            <td style="width: 13%">
+              <select class="spec-select member-status" id="<%= value._id %>">
+                <option value="ACTIVE" <%= value.memberStatus === 'ACTIVE' ? 'selected': '' %>>ACTIVE</option>
+                <option value="BLOCKED" <%= value.memberStatus === 'BLOCKED' ? 'selected': '' %>>BLOCKED</option>
+                <option value="DELETE" <%= value.memberStatus === 'DELETE' ? 'selected': '' %>>DELETE</option>
+              </select>
+            </td>
+          </tbody>
+          <% }) %>
+        </table>
+      </div>
+    </div>
+  </div>
+  <% } %>
 </body>
 
 <%- include('includes/footer') %>

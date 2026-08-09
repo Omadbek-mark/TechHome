@@ -11,14 +11,14 @@ const authService = new AuthService();
 
 const memberController: T = {};
 
-memberController.getRestaurant = async (req: Request, res: Response) => {
+memberController.getStore = async (req: Request, res: Response) => {
   try {
-    console.log('getRestaurant');
-    const result = await memberService.getRestaurant();
+    console.log('getStore');
+    const result = await memberService.getStore();
 
     res.status(HttpCode.OK).json(result);
   } catch (err) {
-    console.log("Error, getRestaurant:", err);
+    console.log("Error, getStore:", err);
     if (err instanceof Errors) res.status(err.code).json(err);
     else res.status(Errors.standard.code).json(Errors.standard);
   }

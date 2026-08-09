@@ -29,8 +29,8 @@ class ProductService {
     console.log("inquiry:", inquiry);
     const match: T = { productStatus: ProductStatus.PROCESS };
 
-    if (inquiry.productCollection)
-      match.productCollection = inquiry.productCollection;
+    if (inquiry.productCategory)
+      match.productCollection = inquiry.productCategory;
     if (inquiry.search) {
       match.productName = { $regex: new RegExp(inquiry.search, "i") };
     }

@@ -1,4 +1,4 @@
-console.log("Signup frontend javascript file");
+console.log("TechHome admin — signup frontend javascript file");
 
 $(function () {
   const fileTarget = $(".file-box .upload-hidden");
@@ -13,7 +13,6 @@ $(function () {
         alert("Please insert only jpeg, jpg and png");
       } else {
         if (uploadFile) {
-          console.log(URL.createObjectURL(uploadFile));
           $(".upload-img-frame")
             .attr("src", URL.createObjectURL(uploadFile))
             .addClass("success");
@@ -35,7 +34,7 @@ function validateSignupForm() {
     memberNick === "" ||
     memberPhone === "" ||
     memberPassword === "" ||
-    confirmPassword === "" 
+    confirmPassword === ""
   ) {
     alert("Please insert all required inputs!");
     return false;
@@ -46,9 +45,12 @@ function validateSignupForm() {
     return false;
   }
 
-  const memberImage = $(".member-image").get(0).files(0).name
-    ? $(".member-image").get(0).files(0).name : null;
+  const files = $(".member-image").get(0).files;
+  const memberImage = files.length ? files[0].name : null;
   if (!memberImage) {
-    alert("Please insert restaurant image!");
+    alert("Please insert store logo!");
+    return false;
   }
+
+  return true;
 }

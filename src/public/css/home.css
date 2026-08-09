@@ -1,67 +1,42 @@
 .home-container {
-  position: relative;
-  width: auto;
-  height: auto;
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: linear-gradient(-45deg, #110303f0, #dd6d04, #011c1afc, #7a6868);
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(61,107,255,0.10), transparent 45%),
+    radial-gradient(circle at 75% 70%, rgba(255,159,28,0.08), transparent 40%),
+    linear-gradient(160deg, var(--panel-dark) 0%, var(--panel-dark-2) 55%, #222933 100%);
 }
 
-.home-container a {
-  text-decoration: none;
-  color: #000000;
-}
-
-.home-container .nav-item a {
-  color: #e3c08d;
-}
-
-.home-container .nav-item a.disabled {
-  color: #898071;
-}
-
-.home-container .navigation-menu {
-  position: relative;
-  z-index: 10000;
-  color: #efefee;
-  font-size: 40px;
-  font-family: monospace;
-}
-
-.home-container .animation-frame {
-  position: relative;
+.animation-frame {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 55px;
+  padding: 90px 20px 60px;
 }
 
-.home-container .animation-wrapper {
+.animation-wrapper {
+  width: 380px;
+  max-width: 90vw;
   position: relative;
-  width: 775px;
-  height: 775px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  text-align: center;
 }
 
-.home-container .sphere-animation {
-  position: relative;
-  width: 580px;
-  height: 580px;
-}
+.sphere-animation { width: 100%; filter: drop-shadow(0 0 30px rgba(61,107,255,0.12)); }
+.sphere path { fill: none; stroke-width: 1; }
 
-.home-container .sphere path {
-  fill: url(#sphereGradient);
-  stroke-width: 1px;
-  stroke: rgba(80, 80, 80, 0.35);
-  backface-visibility: hidden;
+.home-caption {
+  color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  margin-top: 8px;
+  letter-spacing: -0.01em;
 }
+.home-caption span { color: var(--accent-blue); }
 
-@media (min-width: 500px) {
-  .sphere path {
-    stroke-width: 0.4px;
-  }
+.home-subcaption {
+  color: var(--steel-light);
+  font-size: 13.5px;
+  margin-top: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.04em;
 }

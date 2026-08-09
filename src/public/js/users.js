@@ -1,4 +1,4 @@
-console.log("Users frontend javascript file");
+console.log("TechHome admin — users frontend javascript file");
 
 $(function () {
   $(".member-status").on("change", function (e) {
@@ -10,14 +10,14 @@ $(function () {
         _id: id,
         memberStatus: memberStatus,
       })
-      .then(response => {
+      .then((response) => {
         console.log("response:", response);
         const result = response.data;
 
-      if (result.data) {
-        $(".member-status").blur();
-      } else alert("User update failed!");
-    })
+        if (result.data) {
+          $(".member-status").blur();
+        } else alert("User update failed!");
+      })
       .catch((err) => {
         console.log(err);
         alert("User update failed");
