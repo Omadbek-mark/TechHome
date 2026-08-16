@@ -1,4 +1,4 @@
-import { LoginInput, Member, MemberInput, MemberUpdateInput } from "../libs/types/member";
+import { LoginInput, Member, MemberInput, MemberListWithStats, MemberUpdateInput } from "../libs/types/member";
 import MemberModel from "../schema/Member.model";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import { MemberStatus, MemberType } from "../libs/enums/member.enum";
@@ -89,19 +89,39 @@ class MemberService {
     return result;
   }
 
-  public async getTopUsers(): Promise<Member[]> {
-    const result = await this.memberModel
-      .find({
-        memberStatus: MemberStatus.ACTIVE,
-        memberPoints: { $gte: 1 },
-      })
-      .sort({ memberPoints: -1 })
-      .limit(4)
-      .exec();
-    if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+  public async getAllUsers(): Promise<MemberListWithStats> {
+    try {
+      // Only ordinary customers belong on this list — the STORE account itself is excluded.
+      const users: Member[] = await this.memberModel
+    .find({ memberType: MemberType.USER })
+    .lean<Member[]>()
+    .exec();
 
-    return result;
+      const total = users.length;
+      const activeCount = users.filter((u) => u.memberStatus === MemberStatus.ACTIVE).length;
+      const blockedCount = users.filter((u) => u.memberStatus === MemberStatus.BLOCK).length;
+      const deletedCount = users.filter((u) => u.memberStatus === MemberStatus.DELETE).length;
+
+      return { users, total, activeCount, blockedCount, deletedCount };
+    } catch (err) {
+      console.log("Error, model:getAllUsers:", err);
+      throw new Errors(HttpCode.BAD_REQUEST, Message.NO_DATA_FOUND);
+    }
   }
+
+  // public async getTopUsers(): Promise<Member[]> {
+  //   const result = await this.memberModel
+  //     .find({
+  //       memberStatus: MemberStatus.ACTIVE,
+  //       memberPoints: { $gte: 1 },
+  //     })
+  //     .sort({ memberPoints: -1 })
+  //     .limit(4)
+  //     .exec();
+  //   if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+
+  //   return result;
+  // }
 
   public async addUserPoint(member: Member, point: number): Promise<Member> {
     const memberId = shapeIntoMongooseObjectId(member._id);

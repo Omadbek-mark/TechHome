@@ -40,7 +40,6 @@ const productSchema = new Schema(
       type: Number,
       enum: WarrantyYears,
       default: WarrantyYears.ONE_YEAR,
-      required: true,
     },
 
     installmentMonths: {
@@ -50,10 +49,13 @@ const productSchema = new Schema(
       required: true,
     },
 
+    installmentMonthly: {
+      type: Number,
+    },
+
     energyClass: {
       type: String,
       enum: EnergyClass,
-      required: true,
     },
 
     productDesc: {

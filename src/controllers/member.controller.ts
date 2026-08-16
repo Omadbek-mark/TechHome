@@ -5,6 +5,7 @@ import { ExtendedRequest, LoginInput, Member, MemberInput, MemberUpdateInput } f
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import AuthService from "../models/Auth.service";
 import { AUTH_TIMER } from "../libs/config";
+import { MemberType } from "../libs/enums/member.enum";
 
 const memberService = new MemberService();
 const authService = new AuthService();
@@ -112,18 +113,38 @@ memberController.updateMember = async (req: ExtendedRequest, res: Response) => {
   }
 };
 
-memberController.getTopUsers = async (req: Request, res: Response) => {
+/**
+ * GET /member/all — STORE only. Powers the admin "All customers" screen:
+ * the customer list plus total/active/blocked counts for the stat cards.
+ */
+memberController.getAllUsers = async (req: ExtendedRequest, res: Response) => {
   try {
-    console.log("getTopUsers");
-    const result = await memberService.getTopUsers();
+    console.log("getAllUsers");
+    if (!req.member || req.member.memberType !== MemberType.STORE)
+      throw new Errors(HttpCode.FORBIDDEN, Message.NOT_ALLOWED_REQUEST);
+
+    const result = await memberService.getAllUsers();
 
     res.status(HttpCode.OK).json(result);
   } catch (err) {
-    console.log("Error, getTopUsers:", err);
+    console.log("Error, getAllUsers:", err);
     if (err instanceof Errors) res.status(err.code).json(err);
     else res.status(Errors.standard.code).json(Errors.standard);
   }
-}
+};
+
+// memberController.getTopUsers = async (req: Request, res: Response) => {
+//   try {
+//     console.log("getTopUsers");
+//     const result = await memberService.getTopUsers();
+
+//     res.status(HttpCode.OK).json(result);
+//   } catch (err) {
+//     console.log("Error, getTopUsers:", err);
+//     if (err instanceof Errors) res.status(err.code).json(err);
+//     else res.status(Errors.standard.code).json(Errors.standard);
+//   }
+// }
 
 
 memberController.verifyAuth = async (

@@ -6,6 +6,7 @@ import productController from "./controllers/product.controller";
 import ordercontroller from "./controllers/order.controller";
 import orderController from "./controllers/order.controller";
 import { verify } from "jsonwebtoken";
+import storeController from "./controllers/store.controller";
 
 /** Member */
 router.get(
@@ -30,7 +31,7 @@ router.post(
   uploader("members").single("memberImage"),
   memberController.updateMember
 );
-router.get("/member/top-users", memberController.getTopUsers); 
+// router.get("/member/top-users", memberController.getTopUsers); 
 
 /** Product */
 router.get(

@@ -13,6 +13,7 @@ export enum ProductStatus {
 }
 
 export enum WarrantyYears {
+  NO_WARRANTY = 0,
   ONE_YEAR = 1,
   TWO_YEARS = 2, 
   THREE_YEARS = 3,

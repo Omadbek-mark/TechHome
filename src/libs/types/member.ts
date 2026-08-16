@@ -46,6 +46,14 @@ export interface MemberUpdateInput {
   memberImage?: string;
 }
 
+export interface MemberListWithStats {
+  users: Member[];
+  total: number;
+  activeCount: number;
+  blockedCount: number;
+  deletedCount: number;
+}
+
 export interface ExtendedRequest extends Request {
   member: Member;
   file: Express.Multer.File;

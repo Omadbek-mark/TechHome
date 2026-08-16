@@ -21,7 +21,7 @@ routerAdmin.get('/check-me', storeController.checkAuthSession);
 routerAdmin.get(
   '/product/all',
   storeController.verifyStore,
-  productController.getAllProducts
+  storeController.getAllProducts
 );
 routerAdmin.post(
   "/product/create",

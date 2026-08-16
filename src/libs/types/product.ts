@@ -9,8 +9,9 @@ export interface Product {
   productPrice: number;
   productLeftCount: number;
   energyClass: EnergyClass;
-  warrantyYears: number;
-  installmentMonths: number;
+  warrantyYears?: number;
+  installmentMonths?: number;
+  installmentMonthly?: number;
   productDesc?: string;
   productImages: string[];
   productViews: number;
@@ -33,8 +34,9 @@ export interface ProductInput {
   productPrice: number;
   productLeftCount: number;
   energyClass?: EnergyClass;
-  warrantyYears: number;
-  installmentMonths: number;
+  warrantyYears?: number;
+  installmentMonths?: number;
+  installmentMonthly?: number;
   productDesc?: string;
   productImages?: string[];
   productViews?: number;
@@ -48,9 +50,19 @@ export interface ProductUpdateInput {
   productPrice?: number;
   productLeftCount?: number;
   energyClass?: EnergyClass;
-  warrantyYears: number;
-  installmentMonths: number;
+  warrantyYears?: number;
+  installmentMonths?: number;
+  installmentMonthly?: number;
   productDesc?: string;
   productImages?: string[];
   productViews?: number;
+}
+
+export interface ProductListWithStats {
+  products: Product[];
+  total: number;
+  activeCount: number;
+  pausedCount: number;
+  deletedCount: number;
+  lowStockCount: number;
 }

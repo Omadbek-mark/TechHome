@@ -6,6 +6,7 @@ import {
   Product,
   ProductInput,
   ProductInquiry,
+  ProductListWithStats,
   ProductUpdateInput,
 } from "../libs/types/product";
 import ProductModel from "../schema/Product.model";
@@ -13,6 +14,8 @@ import { ObjectId } from "mongoose";
 import ViewService from "./View.service";
 import { ViewInput } from "../libs/types/view";
 import { ViewGroup } from "../libs/enums/view.enum";
+
+const LOW_STOCK_THRESHOLD = 10;
 
 class ProductService { 
   private readonly productModel;
@@ -99,16 +102,41 @@ class ProductService {
 
   /** SSR */
 
-  public async getAllProducts(
-  ): Promise<Product[]> {
-    const result = await this.productModel.find().exec();
-    if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+  // public async getAllProducts(
+  // ): Promise<Product[]> {
+  //   const result = await this.productModel.find().exec();
+  //   if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
 
-    return result;
+  //   return result;
+  // }
+
+  public async getAllProducts(): Promise<ProductListWithStats> {
+    try {
+      // Single-store project: no memberId filter needed. If you go multi-store
+      // later, add { memberId: storeId } here.
+      const products: Product[] = await this.productModel
+        .find({})
+        .lean<Product[]>()
+        .exec();
+
+      const total = products.length;
+      const activeCount = products.filter((p) => p.productStatus === ProductStatus.PROCESS).length;
+      const pausedCount = products.filter((p) => p.productStatus === ProductStatus.PAUSE).length;
+      const deletedCount = products.filter((p) => p.productStatus === ProductStatus.DELETE).length;
+      const lowStockCount = products.filter((p) => p.productLeftCount <= LOW_STOCK_THRESHOLD).length;
+
+      return { products, total, activeCount, pausedCount, deletedCount, lowStockCount };
+    } catch (err) {
+      console.log("Error, model:getAllProducts:", err);
+      throw new Errors(HttpCode.BAD_REQUEST, Message.NO_DATA_FOUND);
+    }
   }
+
 
   public async createNewProduct(input: ProductInput): Promise<Product> {
     try {
+      const months = Number(input.installmentMonths) || 0;
+    input.installmentMonthly = months > 0 ? +(Number(input.productPrice) / months).toFixed(2) : undefined;
       return await this.productModel.create(input);
     } catch (err) {
       console.log("REAL ERROR:", err);

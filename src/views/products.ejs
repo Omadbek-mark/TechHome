@@ -3,54 +3,123 @@
 <link rel="stylesheet" type="text/css" href="/css/products.css" />
 
 <body>
+  <% if(!member) { %>
   <div class="navigation-menu">
     <ul class="nav justify-content-center">
       <li class="nav-item" style="cursor: pointer">
-        <a class="nav-link" href="/admin/">Home</a>
+        <a class="nav-link active" href="/admin/">Home</a>
       </li>
       <li class="nav-item" style="cursor: pointer">
-        <a class="nav-link active" href="/admin/product/all">Products</a>
+        <a class="nav-link" href="/admin/signup">Signup</a>
       </li>
       <li class="nav-item" style="cursor: pointer">
-        <a class="nav-link" href="/admin/user/all">Users</a>
-      </li>
-      <li
-        class="nav-item"
-        style="cursor: pointer"
-        onclick="return confirm('Do you want to logout?')"
-      >
-        <a class="nav-link" href="/admin/logout">Logout</a>
+        <a class="nav-link" href="/admin/login">Login</a>
       </li>
     </ul>
+  </div>
+  <div class="products-frame" style="color: var(--steel)">
+    <div class="board" style="font-size: 32px">Please login first!</div>
+  </div>
+  <% } else { %>
+
+  <div class="admin-topbar">
+    <div class="admin-topbar-inner">
+      <div class="admin-brand">
+        <div class="admin-logo-box">
+          <img src="/img/logo.png" alt="TechHome logo" class="admin-logo-img">
+        </div>
+        TechHome
+      </div>
+      <div class="admin-nav-links">
+        <a href="/admin/">Home</a>
+        <a class="active" href="/admin/product/all">Products</a>
+        <a href="/admin/user/all">Users</a>
+        <a href="/admin/logout" onclick="return confirm('Do you want to logout?')">Logout</a>
+      </div>
+      <div class="admin-avatar"><%= member.memberNick ? member.memberNick.substring(0,2).toUpperCase() : 'AD' %></div>
+    </div>
   </div>
 
   <div class="products-frame">
     <div class="board">
-      <div class="dishes-table">
-        <div class="section-eyebrow">CATALOG</div>
-        <span class="new-dish-txt">Products</span>
-        <table class="table table-bordered table-hover techhome-table">
+      <div class="products-table">
+        <div class="page-head">
+          <div>
+            <div class="section-eyebrow">CATALOG</div>
+            <span class="new-items-txt">Products</span>
+          </div>
+          <button class="btn btn-primary" id="process-btn">+ New product</button>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-label"><span class="stat-dot" style="background:var(--accent-blue)"></span>Total products</div>
+            <div class="stat-value" id="stat-total"><%= total %></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><span class="stat-dot" style="background:var(--accent-green)"></span>Process</div>
+            <div class="stat-value" id="stat-active"><%= activeCount %></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><span class="stat-dot" style="background:var(--accent-violet)"></span>Paused</div>
+            <div class="stat-value" id="stat-paused"><%= pausedCount %></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><span class="stat-dot" style="background:var(--accent-red)"></span>Deleted</div>
+            <div class="stat-value" id="stat-deleted"><%= deletedCount %></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><span class="stat-dot" style="background:var(--accent-amber)"></span>Low stock</div>
+            <div class="stat-value" id="stat-lowstock"><%= lowStockCount %></div>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="search-box">
+            <input type="text" id="product-search" placeholder="Search products..." />
+          </div>
+          <div class="filter-chips" id="category-filters">
+            <span class="filter-chip active" data-category="ALL">All</span>
+            <span class="filter-chip" data-category="KITCHEN">Kitchen</span>
+            <span class="filter-chip" data-category="LAUNDRY">Laundry</span>
+            <span class="filter-chip" data-category="CLIMATE">Climate</span>
+            <span class="filter-chip" data-category="CLEANING">Cleaning</span>
+            <span class="filter-chip" data-category="ENTERTAINMENT">Entertainment</span>
+          </div>
+        </div>
+
+        <table class="table table-bordered table-hover techhome-table" id="products-table">
           <thead class="thead-light">
             <tr>
               <th scope="col">No</th>
               <th scope="col">Product name</th>
               <th scope="col">Category</th>
               <th scope="col">Price</th>
-              <th scope="col">Left count</th>
+              <th scope="col">Warranty</th>
+              <th scope="col">Installment</th>
+              <th scope="col">Left</th>
               <th scope="col">Status</th>
             </tr>
           </thead>
           <!--  LOOP PRODUCTS: START  -->
           <% products.map(function(value, key) { %>
-          <tbody>
+          <tbody class="product-row" data-category="<%= value.productCategory %>" data-name="<%= value.productName.toLowerCase() %>">
             <td><%= key + 1 %></td>
-            <td><%= value.productName %></td>
-            <td><%= value.productCategory %></td>
+            <td>
+              <div class="name-cell">
+                <!-- <span class="thumb-placeholder"></span> -->
+                <b><%= value.productName %></b>
+              </div>
+            </td>
+            <td><span class="cat-label"><%= value.productCategory %></span></td>
             <td>$<%= value.productPrice %></td>
+            <td class="<%= value.warrantyYears === 0 ? 'muted' : '' %>"><%= value.warrantyYears === 0 ? 'No warranty' : value.warrantyYears + ' year' + (value.warrantyYears > 1 ? 's' : '') %></td>
+            <td class="<%= value.installmentMonths === 0 ? 'muted' : '' %>"><%= value.installmentMonths === 0 ? 'Only cash' : value.installmentMonths + ' months' %></td>
             <td><%= value.productLeftCount %></td>
             <td>
               <select
-                class="spec-select new-product-status"
+                class="spec-select status-pill new-product-status"
+                data-status="<%= value.productStatus %>"
                 id="<%= value._id %>"
               >
                 <option value="PAUSE" <%= value.productStatus === 'PAUSE' ? 'selected': '' %>>PAUSE</option>
@@ -62,13 +131,14 @@
           <% }) %>
           <!--  LOOP PRODUCTS: END  -->
         </table>
-        <div
-          class="long-input"
-          style="align-items: flex-end; margin-bottom: 25px"
-        >
-          <button class="btn btn-primary" id="process-btn">
-            New product
-          </button>
+
+        <div class="table-foot">
+          <span class="showing-text" id="showing-text">Showing 1–<%= total %> of <%= total %> products</span>
+          <div class="pagination-controls">
+            <button class="page-arrow" disabled>&lsaquo;</button>
+            <button class="page-num active">1</button>
+            <button class="page-arrow" disabled>&rsaquo;</button>
+          </div>
         </div>
       </div>
 
@@ -76,11 +146,11 @@
         onsubmit="return validateForm()"
         action="/admin/product/create"
         method="POST"
-        class="dish-container"
+        class="items-container"
         enctype="multipart/form-data"
       >
         <div class="long-input" style="display: flex; align-items: center">
-          <span class="new-dish-txt">New product detail</span>
+          <span class="new-items-txt">New product detail</span>
         </div>
 
         <div class="long-input">
@@ -128,15 +198,16 @@
               <option value="LAUNDRY">Laundry</option>
               <option value="CLIMATE">Climate</option>
               <option value="CLEANING">Cleaning</option>
+              <option value="ENTERTAINMENT">Entertainment</option>
             </select>
           </div>
           <div class="half-input">
             <label>Energy class</label>
             <select class="product-energy" name="energyClass">
-              <option value="A+++" selected>A+++</option>
+              <option value="A+++">A+++</option>
               <option value="A++">A++</option>
               <option value="A+">A+</option>
-              <option value="A">A</option>
+              <option value="A" selected>A</option>
             </select>
           </div>
         </div>
@@ -144,19 +215,19 @@
         <div class="half-input-frame">
           <div class="half-input">
             <label>Warranty (years)</label>
-            <input
-              type="number"
-              placeholder="2"
-              name="warrantyYears"
-              class="product-warranty"
-            />
+            <select class="product-warranty-years" name="warrantyYears">
+              <option value="0" selected>No warranty</option>
+              <option value="1">1 year</option>
+              <option value="2">2 years</option>
+              <option value="3">3 years</option>
+            </select>
           </div>
           <div class="half-input">
             <label>Installment (months)</label>
             <select class="product-installment-months" name="installmentMonths">
-              <option value="">Cash only</option>
+              <option value="0" selected>Cash only</option>
               <option value="6">6 months</option>
-              <option value="12" selected>12 months</option>
+              <option value="12">12 months</option>
             </select>
           </div>
         </div>
@@ -171,49 +242,23 @@
           <div class="media-frame">
             <div class="upload-img-box">
               <img src="/img/upload.svg" id="image-section-1" />
-              <input
-                type="file"
-                name="productImages"
-                class="image-one"
-                required
-                onchange="previewFileHandler(this, 1)"
-              />
+              <input type="file" name="productImages" class="image-one" required onchange="previewFileHandler(this, 1)" />
             </div>
             <div class="upload-img-box">
               <img src="/img/upload.svg" id="image-section-2" />
-              <input
-                type="file"
-                name="productImages"
-                class="image-two"
-                onchange="previewFileHandler(this, 2)"
-              />
+              <input type="file" name="productImages" class="image-two" onchange="previewFileHandler(this, 2)" />
             </div>
             <div class="upload-img-box">
               <img src="/img/upload.svg" id="image-section-3" />
-              <input
-                type="file"
-                name="productImages"
-                class="image-three"
-                onchange="previewFileHandler(this, 3)"
-              />
+              <input type="file" name="productImages" class="image-three" onchange="previewFileHandler(this, 3)" />
             </div>
             <div class="upload-img-box">
               <img src="/img/upload.svg" id="image-section-4" />
-              <input
-                type="file"
-                name="productImages"
-                class="image-four"
-                onchange="previewFileHandler(this, 4)"
-              />
+              <input type="file" name="productImages" class="image-four" onchange="previewFileHandler(this, 4)" />
             </div>
             <div class="upload-img-box">
               <img src="/img/upload.svg" id="image-section-5" />
-              <input
-                type="file"
-                name="productImages"
-                class="image-five"
-                onchange="previewFileHandler(this, 5)"
-              />
+              <input type="file" name="productImages" class="image-five" onchange="previewFileHandler(this, 5)" />
             </div>
             <input name="memberId" class="store-id" hidden />
           </div>
@@ -221,13 +266,12 @@
 
         <div class="operation-buttons">
           <button class="btn btn-danger" id="cancel-btn" type="button">Cancel</button>
-          <button type="submit" class="btn btn-primary" id="create-btn">
-            Create
-          </button>
+          <button type="submit" class="btn btn-primary" id="create-btn">Create</button>
         </div>
       </form>
     </div>
   </div>
+  <% } %>
 
   <script type="text/javascript" src="/js/products.js"></script>
 </body>

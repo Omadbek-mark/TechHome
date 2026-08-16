@@ -5,6 +5,7 @@ import ProductService from "../models/Product.service";
 import { ProductInput, ProductInquiry } from "../libs/types/product";
 import { AdminRequest, ExtendedRequest } from "../libs/types/member";
 import { ProductCategory } from "../libs/enums/product.enum";
+import { MemberType } from "../libs/enums/member.enum";
 
 const productService = new ProductService();
 
@@ -53,15 +54,31 @@ productController.getProduct = async (req: ExtendedRequest, res: Response) => {
 
 
 /** SSR */
-productController.getAllProducts = async (req: Request, res: Response) => {
-  try {
-    console.log('getAllProducts');
-    const data = await productService.getAllProducts();
-    console.log("products", data);
+// productController.getAllProducts = async (req: Request, res: Response) => {
+//   try {
+//     console.log('getAllProducts');
+//     const data = await productService.getAllProducts();
+//     console.log("products", data);
 
-    res.render("products", {products: data});
+//     res.render("products", {products: data});
+//   } catch (err) {
+//     console.log("Error, getAllProducts:", err);
+//     if (err instanceof Errors) res.status(err.code).json(err);
+//     else res.status(Errors.standard.code).json(Errors.standard);
+//   }
+// };
+
+productController.getAdminProducts = async (req: ExtendedRequest, res: Response) => {
+  try {
+    console.log("getAdminProducts");
+    if (!req.member || req.member.memberType !== MemberType.STORE)
+      throw new Errors(HttpCode.FORBIDDEN, Message.NOT_ALLOWED_REQUEST);
+ 
+    const result = await productService.getAllProducts();
+ 
+    res.status(HttpCode.OK).json(result);
   } catch (err) {
-    console.log("Error, getAllProducts:", err);
+    console.log("Error, getAdminProducts:", err);
     if (err instanceof Errors) res.status(err.code).json(err);
     else res.status(Errors.standard.code).json(Errors.standard);
   }

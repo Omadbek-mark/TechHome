@@ -4,8 +4,10 @@ import MemberService from "../models/Member.service";
 import { AdminRequest, LoginInput, MemberInput } from "../libs/types/member";
 import { MemberType } from "../libs/enums/member.enum";
 import Errors, { HttpCode, Message } from "../libs/Errors";
+import ProductService from "../models/Product.service";
 
 const memberService = new MemberService();
+const productService = new ProductService();
 
 const storeController: T = {};
 storeController.goHome = (req: Request, res: Response) => {
@@ -108,14 +110,43 @@ storeController.logout = async (req: AdminRequest, res: Response) => {
   }
 };
 
-storeController.getUsers = async (req: Request, res: Response) => {
+storeController.getUsers = async (req: AdminRequest, res: Response) => {
   try {
     console.log('getUsers');
-    const result = await memberService.getUsers();
+    const { users, total, activeCount, blockedCount, deletedCount } =
+      await memberService.getAllUsers();   // ← eski memberService.getUsers() o'rniga
 
-    res.render("users", { users: result });
+    res.render("users", {
+      member: req.session?.member ?? null,   // ← endi member ham uzatiladi
+      users,
+      total,
+      activeCount,
+      blockedCount,
+      deletedCount,
+    });
   } catch (err) {
     console.log("Error, getUsers:", err);
+    res.redirect("/admin/login");
+  }
+};
+
+storeController.getAllProducts = async (req: AdminRequest, res: Response) => {
+  try {
+    console.log('getAllItems');
+    const { products, total, activeCount, pausedCount, deletedCount, lowStockCount } =
+      await productService.getAllProducts();
+ 
+    res.render("products", {
+      member: req.session?.member ?? null,
+      products,
+      total,
+      activeCount,
+      pausedCount,
+      deletedCount,
+      lowStockCount,
+    });
+  } catch (err) {
+    console.log("Error, getAllProducts:", err);
     res.redirect("/admin/login");
   }
 };
