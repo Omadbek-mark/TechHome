@@ -28,6 +28,30 @@ async function shutdown(exitCode = 0) {
   }
 }
 
+function mongoStartupError(error: unknown): string {
+  if (!(error instanceof Error)) return 'unknown';
+  const details = error as Error & { code?: unknown; cause?: unknown; reason?: { servers?: Map<string, { error?: unknown }> } };
+  if (details.code === 18 || details.code === 8000) return 'authentication rejected';
+  if (details.code === 13) return 'authorization rejected';
+  if (details.name === 'MongoParseError') return 'invalid connection URI';
+
+  for (const code of ['ENOTFOUND', 'ENODATA', 'EAI_AGAIN', 'ECONNREFUSED', 'ETIMEDOUT', 'ECONNRESET',
+    'CERT_HAS_EXPIRED', 'UNABLE_TO_VERIFY_LEAF_SIGNATURE', 'SELF_SIGNED_CERT_IN_CHAIN']) {
+    if (details.code === code) return code;
+  }
+  if (details.cause instanceof Error && details.cause !== error) {
+    const cause = mongoStartupError(details.cause);
+    if (cause !== 'unknown') return cause;
+  }
+  for (const server of details.reason?.servers?.values() ?? []) {
+    if (server.error === error) continue;
+    const cause = mongoStartupError(server.error);
+    if (cause !== 'unknown') return cause;
+  }
+  return details.name === 'MongooseServerSelectionError' || details.name === 'MongoServerSelectionError'
+    ? 'server selection failed' : 'unknown';
+}
+
 async function start() {
   const config = loadSecurityConfig();
   const uri = process.env.MONGO_URL;
@@ -84,7 +108,8 @@ async function start() {
 
 process.once('SIGTERM', () => void shutdown());
 process.once('SIGINT', () => void shutdown());
-start().catch(() => {
+start().catch((error: unknown) => {
   console.error('TechHome startup failed at:', startupStep);
+  if (startupStep.startsWith('MongoDB')) console.error('TechHome MongoDB diagnostic:', mongoStartupError(error));
   void shutdown(1);
 });
