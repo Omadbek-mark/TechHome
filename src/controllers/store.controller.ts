@@ -3,7 +3,7 @@ import { T } from "../libs/types/common";
 import MemberService from "../models/Member.service";
 import { AdminRequest, LoginInput } from "../libs/types/member";
 import { MemberType } from "../libs/enums/member.enum";
-import Errors, { HttpCode, Message } from "../libs/Errors";
+import Errors, { HttpCode } from "../libs/Errors";
 import ProductService from "../models/Product.service";
 
 import { csrfToken, regenerateSession } from "../libs/security/csrf";
@@ -38,13 +38,12 @@ storeController.retrieveStore = async (req: AdminRequest, res: Response, next: N
   }
 };
 
-storeController.goHome = (req: Request, res: Response) => {
+storeController.goHome = (_req: Request, res: Response) => {
   try {
-    console.log('goHome');
+
     res.render("home");
-    // send | json | redirect | end | render
-  } catch (err) {
-    console.log("Error, goHome:", err);
+  } catch {
+
     res.redirect("/admin");
 
   }
@@ -54,10 +53,10 @@ storeController.goHome = (req: Request, res: Response) => {
 storeController.getLogin = (req: AdminRequest, res: Response) => {
   try {
     if (req.member) return res.redirect('/admin');
-    console.log('getLogin');
+
     res.render("login");
-  } catch (err) {
-    console.log("Error, getLogin:", err);
+  } catch {
+
     res.redirect("/admin");
   }
 };
@@ -86,27 +85,27 @@ storeController.logout = async (req: AdminRequest, res: Response) => {
 
 storeController.getUsers = async (req: AdminRequest, res: Response) => {
   try {
-    console.log('getUsers');
+
     const { users, total, activeCount, blockedCount, deletedCount } =
-      await memberService.getAllUsers();   // ← eski memberService.getUsers() o'rniga
+      await memberService.getAllUsers();
 
     res.render("users", {
-      member: safeMember(req.member),   // ← endi member ham uzatiladi
+      member: safeMember(req.member),
       users,
       total,
       activeCount,
       blockedCount,
       deletedCount,
     });
-  } catch (err) {
-    console.log("Error, getUsers:", err);
+  } catch {
+
     res.redirect("/admin/login");
   }
 };
 
 storeController.getAllProducts = async (req: AdminRequest, res: Response) => {
   try {
-    console.log('getAllItems');
+
     const { products, total, activeCount, pausedCount, deletedCount, lowStockCount } =
       await productService.getAllProducts();
  
@@ -119,15 +118,15 @@ storeController.getAllProducts = async (req: AdminRequest, res: Response) => {
       deletedCount,
       lowStockCount,
     });
-  } catch (err) {
-    console.log("Error, getAllProducts:", err);
+  } catch {
+
     res.redirect("/admin/login");
   }
 };
 
 storeController.updateChosenUser = async (req: Request, res: Response) => {
   try {
-    console.log('updateChosenUser');
+
     const result = await memberService.updateChosenUser(req.body);
 
     res.status(HttpCode.OK).json({ data: safeMember(result) });

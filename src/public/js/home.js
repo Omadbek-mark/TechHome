@@ -1,5 +1,3 @@
-console.log("TechHome admin — home frontend javascript file");
-
 function fitElementToParent(el, padding) {
   let timeout = null;
 

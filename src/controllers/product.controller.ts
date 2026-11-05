@@ -1,12 +1,10 @@
 import {Request, Response} from "express";
-import Errors, { HttpCode, Message } from "../libs/Errors";
+import { HttpCode } from "../libs/Errors";
 import { T } from "../libs/types/common";
 import ProductService from "../models/Product.service";
 import { ProductInput, ProductInquiry } from "../libs/types/product";
 import { AdminRequest, ExtendedRequest } from "../libs/types/member";
-import { ProductCategory } from "../libs/enums/product.enum";
 import { HttpError, sendError } from "../libs/security/http";
-import { MemberType } from "../libs/enums/member.enum";
 
 const productService = new ProductService();
 
@@ -31,24 +29,11 @@ productController.getProduct = async (req: ExtendedRequest, res: Response) => {
 
 
 /** SSR */
-productController.getAdminProducts = async (req: ExtendedRequest, res: Response) => {
-  try {
-    console.log("getAdminProducts");
-    if (!req.member || req.member.memberType !== MemberType.STORE)
-      throw new Errors(HttpCode.FORBIDDEN, Message.NOT_ALLOWED_REQUEST);
- 
-    const result = await productService.getAllProducts();
- 
-    res.status(HttpCode.OK).json(result);
-  } catch (error) { sendError(res, error); }
-};
-
 productController.createNewProduct = async (
   req: AdminRequest,
   res: Response
 ) => {
   try {
-    console.log('createNewProduct');
     if (!req.files?.length)
       throw new HttpError(400, "IMAGE_REQUIRED", "Please select a product image.");
 
@@ -66,7 +51,6 @@ productController.createNewProduct = async (
 
 productController.updateChosenProduct = async (req: Request, res: Response) => {
   try {
-    console.log('updateChosenProduct');
     const id = req.params.id as string;
 
     const result = await productService.updateChosenProduct(id, req.body);

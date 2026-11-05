@@ -6,3 +6,5 @@ dist
 !.env.example
 
 uploads
+
+.DS_Store

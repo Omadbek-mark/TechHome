@@ -72,7 +72,6 @@ class MemberService {
   }
 
   public async getMemberDetail(member: Member): Promise<Member> {
-    const memberId = shapeIntoMongooseObjectId(member._id);
     const result = await this.memberModel.findOne({ _id: member._id, memberStatus: MemberStatus.ACTIVE }).exec();
     if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
 
@@ -112,44 +111,11 @@ class MemberService {
       const deletedCount = users.filter((u) => u.memberStatus === MemberStatus.DELETE).length;
 
       return { users, total, activeCount, blockedCount, deletedCount };
-    } catch (err) {
-      console.log("Error, model:getAllUsers:", err);
+    } catch {
+
       throw new Errors(HttpCode.BAD_REQUEST, Message.NO_DATA_FOUND);
     }
   }
-
-  // public async getTopUsers(): Promise<Member[]> {
-  //   const result = await this.memberModel
-  //     .find({
-  //       memberStatus: MemberStatus.ACTIVE,
-  //       memberPoints: { $gte: 1 },
-  //     })
-  //     .sort({ memberPoints: -1 })
-  //     .limit(4)
-  //     .exec();
-  //   if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
-
-  //   return result;
-  // }
-
-  public async addUserPoint(member: Member, point: number): Promise<Member | null> {
-    const memberId = shapeIntoMongooseObjectId(member._id);
-
-    return await this.memberModel
-      .findOneAndUpdate(
-        {
-          _id: memberId,
-          memberType: MemberType.USER,
-          memberStatus: MemberStatus.ACTIVE,
-        },
-        { $inc: { memberPoints: point } },
-        { new: true }
-      )
-      .exec();
-  }
-
-
-  /** SSR */
 
   /** Only used by the explicit bootstrap CLI, never an HTTP route. */
   public async bootstrapStore(input: MemberInput): Promise<Member> {

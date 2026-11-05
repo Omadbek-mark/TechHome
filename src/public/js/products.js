@@ -1,4 +1,3 @@
-console.log("TechHome admin — products frontend javascript file");
  
 $(function () {
   $("#process-btn").on("click", () => {
@@ -46,7 +45,6 @@ $(function () {
         select.val(previousStatus);
       }
     } catch (err) {
-      console.log(err);
       alert("Product update failed!");
       select.val(previousStatus);
     }

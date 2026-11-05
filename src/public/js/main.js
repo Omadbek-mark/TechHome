@@ -1,5 +1,3 @@
-console.log("TechHome admin — base frontend javascript file");
-
 // Same-origin admin ajax requests must carry the synchronizer token.
 $(function () {
   const token = $('meta[name="csrf-token"]').attr('content');

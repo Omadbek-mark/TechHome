@@ -29,7 +29,6 @@ router.post(
   uploader("members").single("memberImage"),
   memberController.updateMember
 );
-// router.get("/member/top-users", memberController.getTopUsers); 
 
 /** Public advisor: guest CSRF/session rules still apply to POST. */
 router.get('/ai/status', advisorStatus);

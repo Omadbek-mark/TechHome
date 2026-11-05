@@ -1,7 +1,5 @@
-import { shapeIntoMongooseObjectId } from "../libs/config";
 import { ProductStatus } from "../libs/enums/product.enum";
 import Errors, { HttpCode, Message } from "../libs/Errors";
-import { T } from "../libs/types/common";
 import {
   Product,
   ProductInput,
@@ -113,8 +111,8 @@ class ProductService {
       const lowStockCount = products.filter((p) => p.productLeftCount <= LOW_STOCK_THRESHOLD).length;
 
       return { products: products.map(productResponse), total, activeCount, pausedCount, deletedCount, lowStockCount };
-    } catch (err) {
-      console.log("Error, model:getAllProducts:", err);
+    } catch {
+
       throw new Errors(HttpCode.BAD_REQUEST, Message.NO_DATA_FOUND);
     }
   }

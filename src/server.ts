@@ -4,11 +4,9 @@ import mongoose from "mongoose";
 import createApp from "./app";
 const app = createApp();
 
-// console.log("My URL address:", process.env.MONGO_URL);
-
 mongoose
   .connect(process.env.MONGO_URL as string, {})
-  .then((data) => {
+  .then(() => {
     console.log("MongoDB connection succeed");
     const PORT = process.env.PORT ?? 3002;
     app.listen(PORT, () => {

@@ -14,8 +14,6 @@
     "start:dev": "nodemon --exec ts-node src/server.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "train": "nodemon --exec python3 train.py",
-    "train:ts": "nodemon --exec ts-node src/train.ts",
     "test": "npm run build && node --test test/*.test.cjs test/*.integration.cjs",
     "bootstrap:store": "ts-node src/scripts/bootstrap-store.ts",
     "test:unit": "npm run build && node --test test/*.test.cjs",
@@ -54,7 +52,6 @@
     "nodemon": "^3.0.2",
     "supertest": "7.3.1",
     "ts-node": "^10.9.1",
-    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.2.2"
   }
 }

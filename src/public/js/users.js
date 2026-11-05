@@ -1,5 +1,3 @@
-console.log("TechHome admin — users frontend javascript file");
-
 // Maps a memberStatus value to the stat-card <div id="..."> it affects.
 // Keys must match the actual MemberStatus enum values sent by the <select>
 // and stored in the DB: ACTIVE / BLOCK / DELETE.
