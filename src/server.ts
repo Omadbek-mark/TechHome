@@ -12,6 +12,7 @@ const MongoStore = ConnectMongoDB(session);
 let store: InstanceType<typeof MongoStore> | undefined;
 let server: Server | undefined;
 let stopping = false;
+let startupStep = 'runtime configuration';
 
 async function shutdown(exitCode = 0) {
   if (stopping) return;
@@ -33,16 +34,20 @@ async function start() {
   const port = Number(process.env.PORT ?? 3002);
   if (!uri || !Number.isInteger(port) || port < 1 || port > 65535) throw new Error('Invalid runtime configuration.');
 
+  startupStep = 'uploads access';
   await mkdir(config.uploadsRoot, { recursive: true });
   await access(config.uploadsRoot, constants.W_OK);
   const connectionOptions = { serverSelectionTimeoutMS: 5000, connectTimeoutMS: 5000 };
+  startupStep = 'MongoDB connection';
   await mongoose.connect(uri, connectionOptions);
   const database = mongoose.connection.db;
   if (config.production) {
+    startupStep = 'MongoDB topology';
     const topology = await database.command({ hello: 1 });
     if (!topology.setName && topology.msg !== 'isdbgrid') throw new Error('MongoDB transactions require a replica set or sharded cluster.');
   }
 
+  startupStep = 'MongoDB session store';
   const sessionStore = await new Promise<InstanceType<typeof MongoStore>>((resolve, reject) => {
     const candidate = new MongoStore({ uri, collection: 'sessions', connectionOptions }, error => {
       if (error) reject(error);
@@ -52,6 +57,7 @@ async function start() {
     candidate.on('error', () => console.error('Session storage unavailable.'));
   });
 
+  startupStep = 'HTTP app initialization';
   const app = createApp({
     config,
     store: sessionStore,
@@ -78,4 +84,7 @@ async function start() {
 
 process.once('SIGTERM', () => void shutdown());
 process.once('SIGINT', () => void shutdown());
-start().catch(() => { console.error('Startup failed. Verify runtime configuration, uploads and MongoDB.'); void shutdown(1); });
+start().catch(() => {
+  console.error('TechHome startup failed at:', startupStep);
+  void shutdown(1);
+});
