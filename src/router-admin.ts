@@ -5,17 +5,13 @@ import productController from "./controllers/product.controller";
 import  makeUploader from "./libs/utils/uploader";
 
 /** Store */
-routerAdmin.get('/', storeController.goHome);
+routerAdmin.get('/', storeController.retrieveStore, storeController.goHome);
 routerAdmin
-  .get('/login', storeController.getLogin)
+  .get('/login', storeController.retrieveStore, storeController.getLogin)
   .post('/login', storeController.processLogin);
-routerAdmin
-  .get('/signup', storeController.getSignup)
-  .post('/signup',   makeUploader("members").single("memberImage"),
- storeController.processSignup);
-
-routerAdmin.get('/logout', storeController.logout);
-routerAdmin.get('/check-me', storeController.checkAuthSession);
+routerAdmin.all('/signup', (_req, res) => res.status(404).json({ code: 'NOT_FOUND', message: 'Not found.' }));
+routerAdmin.post('/logout', storeController.verifyStore, storeController.logout);
+routerAdmin.get('/check-me', storeController.verifyStore, storeController.checkAuthSession);
 
 /** Product */
 routerAdmin.get(

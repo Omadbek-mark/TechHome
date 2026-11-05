@@ -34,7 +34,7 @@ $(function () {
     const nextStatus = select.val();
  
     try {
-      const response = await axios.post(`/admin/product/${id}`, { productStatus: nextStatus });
+      const response = await axios.post(`/admin/product/${id}`, { productStatus: nextStatus }, { headers: { "X-CSRF-Token": $('meta[name="csrf-token"]').attr("content") } });
       const result = response.data;
       if (result.data) {
         select.attr("data-status", nextStatus);
@@ -78,6 +78,56 @@ $(function () {
     $(this).addClass("active");
     applyProductFilters();
   });
+  const priceDialog = document.getElementById("price-deal-dialog");
+  if (priceDialog) {
+    const form = document.getElementById("price-deal-form");
+    const currentPrice = document.getElementById("deal-current-price");
+    const oldPrice = document.getElementById("deal-old-price");
+    const error = document.getElementById("price-deal-error");
+    const save = document.getElementById("price-deal-save");
+    let selectedButton = null, saving = false;
+    $(".price-deal-button[data-id]").on("click", function () {
+      selectedButton = $(this);
+      form.reset(); oldPrice.setCustomValidity(""); error.hidden = true;
+      document.getElementById("price-deal-name").textContent = selectedButton.attr("data-name");
+      currentPrice.value = selectedButton.attr("data-price");
+      oldPrice.value = selectedButton.attr("data-old-price") || "";
+      priceDialog.showModal(); currentPrice.focus();
+    });
+    oldPrice.addEventListener("input", () => oldPrice.setCustomValidity(""));
+    currentPrice.addEventListener("input", () => oldPrice.setCustomValidity(""));
+    document.getElementById("price-clear-deal").addEventListener("click", () => { oldPrice.value = ""; oldPrice.setCustomValidity(""); oldPrice.focus(); });
+    document.getElementById("price-deal-cancel").addEventListener("click", () => { if (!saving) priceDialog.close(); });
+    priceDialog.addEventListener("cancel", event => { if (saving) event.preventDefault(); });
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      if (saving || !selectedButton) return;
+      oldPrice.setCustomValidity("");
+      if (oldPrice.value !== "" && Number(oldPrice.value) <= Number(currentPrice.value)) oldPrice.setCustomValidity("Old price must be higher than the current price.");
+      if (!form.reportValidity()) return;
+      saving = true; error.hidden = true;
+      $(form).find("input, button").prop("disabled", true); save.textContent = "Saving…";
+      try {
+        const response = await axios.post(`/admin/product/${selectedButton.attr("data-id")}`, { productPrice: currentPrice.value, productOldPrice: oldPrice.value }, { headers: { "X-CSRF-Token": $('meta[name="csrf-token"]').attr("content") } });
+        const product = response.data.data;
+        if (!product || !Number.isFinite(product.productPrice)) throw new Error("Invalid price response");
+        const hasDeal = typeof product.productOldPrice === "number" && product.productOldPrice > product.productPrice;
+        const row = selectedButton.closest(".product-row");
+        row.find(".current-product-price").text(`$${product.productPrice.toFixed(2)}`);
+        row.find(".old-product-price").text(hasDeal ? `$${product.productOldPrice.toFixed(2)}` : "").prop("hidden", !hasDeal);
+        row.find(".product-deal-badge").prop("hidden", !hasDeal);
+        selectedButton.attr("data-price", product.productPrice).attr("data-old-price", hasDeal ? product.productOldPrice : "");
+        const status = document.getElementById("price-update-status"); status.textContent = "Prices saved."; status.hidden = false;
+        priceDialog.close();
+      } catch (err) {
+        const code = err.response && err.response.data && err.response.data.code;
+        const messages = { INVALID_DISCOUNT: "Old price must be higher than the current price.", INVALID_PRODUCT: "Please check the prices. Use up to two decimal places.", PRODUCT_CHANGED: "This product changed. Reload the page and try again.", CSRF_INVALID: "Your session changed. Reload the page and try again." };
+        error.textContent = messages[code] || "Unable to save prices. Please try again or reload the page."; error.hidden = false;
+      } finally {
+        saving = false; $(form).find("input, button").prop("disabled", false); save.textContent = "Save prices";
+      }
+    });
+  }
 });
  
 function validateForm() {

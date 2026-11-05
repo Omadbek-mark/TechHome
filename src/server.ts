@@ -1,7 +1,8 @@
 import dotenv from "dotenv";
 dotenv.config();
 import mongoose from "mongoose";
-import app from "./app";
+import createApp from "./app";
+const app = createApp();
 
 // console.log("My URL address:", process.env.MONGO_URL);
 
@@ -15,4 +16,4 @@ mongoose
       console.info(`Admin project on http://localhost:${PORT}/admin \n`);
     });
   })
-  .catch((err) => console.log(`ERROR on connection MongoDB`, err));
+  .catch(() => { console.error("Database connection failed."); process.exitCode = 1; });

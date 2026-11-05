@@ -1,14 +1,31 @@
-import { ObjectId } from "mongoose";
+import { Types } from "mongoose";
 import { ProductCategory, EnergyClass, ProductStatus } from "../enums/product.enum";
 
-export interface Product {
-  _id: ObjectId;
+export interface ProductSpecs {
+  brand?: string;
+  model?: string;
+  widthCm?: number;
+  heightCm?: number;
+  depthCm?: number;
+  capacityLiters?: number;
+  loadKg?: number;
+  noiseDb?: number;
+  energyKwhPerYear?: number;
+  coolingCapacityBtu?: number;
+  dustCapacityLiters?: number;
+  screenSizeInches?: number;
+}
+
+export interface Product extends ProductSpecs {
+  productOldPrice?: number;
+  installmentLastMonth?: number;
+  _id: Types.ObjectId;
   productStatus: ProductStatus;
   productCategory: ProductCategory;
   productName: string;
   productPrice: number;
   productLeftCount: number;
-  energyClass: EnergyClass;
+  energyClass?: EnergyClass;
   warrantyYears?: number;
   installmentMonths?: number;
   installmentMonthly?: number;
@@ -25,9 +42,12 @@ export interface ProductInquiry {
   limit: number;
   productCategory?: ProductCategory;
   search?: string;
+  onSale?: boolean;
+  brand?: string;
 }
 
-export interface ProductInput {
+export interface ProductInput extends ProductSpecs {
+  productOldPrice?: number;
   productStatus?: ProductStatus;
   productCategory: ProductCategory;
   productName: string;
@@ -42,8 +62,8 @@ export interface ProductInput {
   productViews?: number;
 }
 
-export interface ProductUpdateInput {
-  _id: ObjectId;
+export interface ProductUpdateInput extends Partial<ProductInput> {
+  _id?: Types.ObjectId;
   productStatus?: ProductStatus;
   productCategory?: ProductCategory;
   productName?: string;
@@ -66,3 +86,4 @@ export interface ProductListWithStats {
   deletedCount: number;
   lowStockCount: number;
 }
+export interface ProductPage { items: Product[]; total: number; page: number; limit: number; }

@@ -3,10 +3,7 @@ const router = express.Router();
 import memberController from "./controllers/member.controller";
 import uploader from "./libs/utils/uploader";
 import productController from "./controllers/product.controller";
-import ordercontroller from "./controllers/order.controller";
 import orderController from "./controllers/order.controller";
-import { verify } from "jsonwebtoken";
-import storeController from "./controllers/store.controller";
 
 /** Member */
 router.get(
@@ -17,7 +14,6 @@ router.post('/member/login', memberController.login);
 router.post('/member/signup', memberController.signup);
 router.post(
   '/member/logout',
-  memberController.verifyAuth,
   memberController.logout
 );
 router.get(
@@ -34,6 +30,7 @@ router.post(
 // router.get("/member/top-users", memberController.getTopUsers); 
 
 /** Product */
+router.get("/product/catalog", productController.getCatalog);
 router.get(
   "/product/all",
   productController.getProducts

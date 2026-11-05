@@ -1,23 +1,38 @@
-import { ObjectId } from "mongoose";
+import { Types } from "mongoose";
 import { OrderStatus } from "../enums/order.enum";
 import { Product } from "./product";
 
 export interface OrderItem {
-  _id: ObjectId;
+  _id: Types.ObjectId;
   itemQuantity: number;
   itemPrice: number;
-  orderId: ObjectId;
-  productId: ObjectId;
+  itemPriceCents?: number;
+  productName?: string;
+  productImage?: string;
+  installmentMonths?: number;
+  installmentMonthly?: number;
+  installmentLastMonth?: number;
+  orderId: Types.ObjectId;
+  productId: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface Order {
-  _id: ObjectId;
+  _id: Types.ObjectId;
   orderTotal: number;
   orderDelivery: number;
+  orderSubtotalCents?: number;
+  orderDeliveryCents?: number;
+  orderTotalCents?: number;
+  currency?: 'USD';
+  paymentMode?: 'DEMO';
+  workflowVersion?: number;
+  stockReserved?: boolean;
+  idempotencyKey?: string;
+  checkoutHash?: string;
   orderStatus: OrderStatus;
-  memberId: ObjectId;
+  memberId: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
   /** from Aggregations */
@@ -27,9 +42,9 @@ export interface Order {
 
 export interface OrderItemInput {
   itemQuantity: number;
-  itemPrice: number;
-  productId: ObjectId;
-  orderId?: ObjectId;
+  productId: string;
+  /** Accepted only for old clients and ignored by checkout. */
+  itemPrice?: number;
 }
 
 export interface OrderInquiry {
@@ -42,3 +57,5 @@ export interface OrderUpdateInput {
   orderId: string;
   orderStatus: OrderStatus;
 }
+/** Persisted order; aggregation joins exist only on list responses. */
+export type OrderRecord = Omit<Order, "orderItems" | "productData">;

@@ -12,13 +12,14 @@
   </div>
 
   <form class="login-container" action="/admin/login" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
     <div class="login-frame">
       <div class="login-top">
         <span>Enter</span>
         <div>Go back <a href="/admin" style="color: var(--accent-blue)">Home</a></div>
         <p>
           Not registered yet?
-          <a href="/admin/signup" style="color: var(--accent-blue)">Signup</a>
+
         </p>
       </div>
       <div class="login-input-frame">

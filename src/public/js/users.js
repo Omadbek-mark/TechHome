@@ -19,6 +19,8 @@ function adjustStatCard(status, delta) {
 $(function () {
   $(".member-status").on("change", function (e) {
     const select = $(this);
+    if (select.prop('disabled')) return;
+    select.prop('disabled', true);
     const id = e.target.id;
     const previousStatus = select.attr("data-status"); // status before this change
     const nextStatus = select.val();                    // status the user just picked
@@ -27,7 +29,7 @@ $(function () {
       .post("/admin/user/edit", {
         _id: id,
         memberStatus: nextStatus,
-      })
+      }, { headers: { "X-CSRF-Token": $('meta[name="csrf-token"]').attr("content") } })
       .then((response) => {
         const result = response.data;
 
@@ -43,10 +45,10 @@ $(function () {
         }
       })
       .catch((err) => {
-        console.log(err);
         alert("User update failed");
         select.val(previousStatus); // roll the dropdown back
-      });
+      })
+      .finally(() => select.prop("disabled", false));
   });
 
   // ---- search (client-side, over the rendered rows) ----

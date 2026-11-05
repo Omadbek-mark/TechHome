@@ -10,7 +10,10 @@ import {
   ProductUpdateInput,
 } from "../libs/types/product";
 import ProductModel from "../schema/Product.model";
-import { ObjectId } from "mongoose";
+import { Types } from "mongoose";
+import { catalogInquiry, catalogMatch, productFields, productResponse } from "../libs/catalog/product";
+import { HttpError } from "../libs/security/http";
+import { ProductPage } from "../libs/types/product";
 import ViewService from "./View.service";
 import { ViewInput } from "../libs/types/view";
 import { ViewGroup } from "../libs/enums/view.enum";
@@ -29,38 +32,32 @@ class ProductService {
   /** SPA */
 
   public async getProducts(inquiry: ProductInquiry): Promise<Product[]> {
-    console.log("inquiry:", inquiry);
-    const match: T = { productStatus: ProductStatus.PROCESS };
+    const parsed = catalogInquiry(inquiry as unknown as Record<string, unknown>);
+    return (await this.productModel.aggregate([
+      { $match: catalogMatch(parsed) }, { $sort: this.sort(parsed.order) },
+      { $skip: (parsed.page - 1) * parsed.limit }, { $limit: parsed.limit },
+    ]).exec()).map(productResponse);
+  }
 
-    if (inquiry.productCategory)
-      match.productCollection = inquiry.productCategory;
-    if (inquiry.search) {
-      match.productName = { $regex: new RegExp(inquiry.search, "i") };
-    }
+  private sort(order: string): Record<string, 1 | -1> {
+    return order === 'productPrice' ? { productPrice: 1, _id: 1 } : order === 'priceDesc' ? { productPrice: -1, _id: 1 } : { [order]: -1, _id: 1 };
+  }
 
-    const sort: T =
-      inquiry.order === "productPrice"
-        ? { [inquiry.order]: 1 }
-        : { [inquiry.order]: -1 };
-    
-    const result = await this.productModel
-      .aggregate([
-      { $match: match },
-      { $sort: sort },
-      {$skip: (inquiry.page * 1 - 1) * inquiry.limit},
-      { $limit: inquiry.limit * 1},
-      ])
-      .exec();
-    if (!result.length) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
-
-    return result;
+  public async getCatalog(input: Record<string, unknown>): Promise<ProductPage> {
+    const inquiry = catalogInquiry(input);
+    const [result] = await this.productModel.aggregate([
+      { $match: catalogMatch(inquiry) },
+      { $facet: { items: [{ $sort: this.sort(inquiry.order) }, { $skip: (inquiry.page - 1) * inquiry.limit }, { $limit: inquiry.limit }], total: [{ $count: 'count' }] } },
+    ]).exec();
+    return { items: (result?.items ?? []).map(productResponse), total: result?.total?.[0]?.count ?? 0, page: inquiry.page, limit: inquiry.limit };
   }
 
   public async getProduct(
-    memberId: ObjectId | null,
+    memberId: Types.ObjectId | null,
     id: string
   ): Promise<Product> {
-    const productId = shapeIntoMongooseObjectId(id);
+    if (!/^[a-f0-9]{24}$/i.test(id)) throw new HttpError(400, "INVALID_PRODUCT_ID", "Invalid product ID.");
+    const productId = new Types.ObjectId(id);
 
     let result = await this.productModel
       .findOne({
@@ -80,10 +77,10 @@ class ProductService {
 
       const existView = await this.viewService.checkViewExistence(input);
 
-      console.log("exist:", !!existView);
+
       if (!existView) {
         // Insert View
-        console.log("PLANNING TO INSERT NEW VIEW");
+
         await this.viewService.insertMemberView(input);
 
         // Increase Counts
@@ -97,23 +94,13 @@ class ProductService {
       }
     }
     
-    return result;
+    if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+    return productResponse(result);
   }
 
   /** SSR */
-
-  // public async getAllProducts(
-  // ): Promise<Product[]> {
-  //   const result = await this.productModel.find().exec();
-  //   if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
-
-  //   return result;
-  // }
-
   public async getAllProducts(): Promise<ProductListWithStats> {
     try {
-      // Single-store project: no memberId filter needed. If you go multi-store
-      // later, add { memberId: storeId } here.
       const products: Product[] = await this.productModel
         .find({})
         .lean<Product[]>()
@@ -125,7 +112,7 @@ class ProductService {
       const deletedCount = products.filter((p) => p.productStatus === ProductStatus.DELETE).length;
       const lowStockCount = products.filter((p) => p.productLeftCount <= LOW_STOCK_THRESHOLD).length;
 
-      return { products, total, activeCount, pausedCount, deletedCount, lowStockCount };
+      return { products: products.map(productResponse), total, activeCount, pausedCount, deletedCount, lowStockCount };
     } catch (err) {
       console.log("Error, model:getAllProducts:", err);
       throw new Errors(HttpCode.BAD_REQUEST, Message.NO_DATA_FOUND);
@@ -134,28 +121,28 @@ class ProductService {
 
 
   public async createNewProduct(input: ProductInput): Promise<Product> {
-    try {
-      const months = Number(input.installmentMonths) || 0;
-    input.installmentMonthly = months > 0 ? +(Number(input.productPrice) / months).toFixed(2) : undefined;
-      return await this.productModel.create(input);
-    } catch (err) {
-      console.log("REAL ERROR:", err);
-      console.log("Error, model:createNewProduct:", err);
-      throw new Errors(HttpCode.BAD_REQUEST, Message.CREATE_FAILED);
+    const { productImages, ...source } = input;
+    const fields = productFields(source);
+    const clean = Object.fromEntries(Object.entries(fields).filter(([, value]) => value !== null));
+    try { return productResponse(await this.productModel.create({ ...clean, productImages })); }
+    catch (error) {
+      if (error instanceof Error && 'code' in error && error.code === 11000) throw new HttpError(409, 'PRODUCT_EXISTS', 'A product with this name and energy class already exists.');
+      throw new HttpError(400, 'INVALID_PRODUCT', 'Unable to save the product. Please check its fields.');
     }
   }
 
-  public async updateChosenProduct(
-    id: string,
-    input: ProductUpdateInput
-  ): Promise<Product> {
-    id = shapeIntoMongooseObjectId(id);
-    const result = await this.productModel.findOneAndUpdate({ _id: id }, input, { new: true })
-    .exec();
-    if (!result) throw new Errors(HttpCode.NOT_MODIFIED, Message.UPDATE_FAILED);
-
-    return result;
+  public async updateChosenProduct(id: string, input: ProductUpdateInput): Promise<Product> {
+    if (!/^[a-f0-9]{24}$/i.test(id)) throw new HttpError(400, 'INVALID_PRODUCT_ID', 'Invalid product ID.');
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const current = await this.productModel.findById(id).lean().exec();
+      if (!current) throw new HttpError(404, 'PRODUCT_NOT_FOUND', 'Product not found.');
+      const fields = productFields(input, current);
+      const set = Object.fromEntries(Object.entries(fields).filter(([, value]) => value !== null));
+      const unset = Object.fromEntries(Object.entries(fields).filter(([, value]) => value === null).map(([key]) => [key, 1]));
+      const result = await this.productModel.findOneAndUpdate({ _id: id, __v: (current as Product & { __v?: number }).__v }, { $set: set, $unset: unset, $inc: { __v: 1 } }, { new: true, runValidators: true }).exec();
+      if (result) return productResponse(result);
+    }
+    throw new HttpError(409, 'PRODUCT_CHANGED', 'The product changed. Please reload and retry.');
   }
- }
-
+}
 export default ProductService;

@@ -10,7 +10,7 @@
         <a class="nav-link active" href="/admin/">Home</a>
       </li>
       <li class="nav-item" style="cursor: pointer">
-        <a class="nav-link" href="/admin/signup">Signup</a>
+
       </li>
       <li class="nav-item" style="cursor: pointer">
         <a class="nav-link" href="/admin/login">Login</a>
@@ -34,7 +34,7 @@
         <a href="/admin/">Home</a>
         <a class="active" href="/admin/product/all">Products</a>
         <a href="/admin/user/all">Users</a>
-        <a href="/admin/logout" onclick="return confirm('Do you want to logout?')">Logout</a>
+        <form action="/admin/logout" method="POST"><input type="hidden" name="_csrf" value="<%= csrfToken %>" /><button type="submit" class="nav-link admin-logout">Logout</button></form>
       </div>
       <div class="admin-avatar"><%= member.memberNick ? member.memberNick.substring(0,2).toUpperCase() : 'AD' %></div>
     </div>
@@ -51,6 +51,7 @@
           <button class="btn btn-primary" id="process-btn">+ New product</button>
         </div>
 
+        <p id="price-update-status" role="status" hidden></p>
         <div class="stat-grid">
           <div class="stat-card">
             <div class="stat-label"><span class="stat-dot" style="background:var(--accent-blue)"></span>Total products</div>
@@ -99,6 +100,7 @@
               <th scope="col">Installment</th>
               <th scope="col">Left</th>
               <th scope="col">Status</th>
+              <th scope="col">Actions</th>
             </tr>
           </thead>
           <!--  LOOP PRODUCTS: START  -->
@@ -112,7 +114,11 @@
               </div>
             </td>
             <td><span class="cat-label"><%= value.productCategory %></span></td>
-            <td>$<%= value.productPrice %></td>
+            <td class="product-price-cell">
+              <span class="current-product-price">$<%= value.productPrice %></span>
+              <del class="old-product-price" <%= typeof value.productOldPrice === 'number' && value.productOldPrice > value.productPrice ? '' : 'hidden' %>><%= typeof value.productOldPrice === 'number' && value.productOldPrice > value.productPrice ? '$' + value.productOldPrice : '' %></del>
+              <span class="product-deal-badge" <%= typeof value.productOldPrice === 'number' && value.productOldPrice > value.productPrice ? '' : 'hidden' %>>Deal</span>
+            </td>
             <td class="<%= value.warrantyYears === 0 ? 'muted' : '' %>"><%= value.warrantyYears === 0 ? 'No warranty' : value.warrantyYears + ' year' + (value.warrantyYears > 1 ? 's' : '') %></td>
             <td class="<%= value.installmentMonths === 0 ? 'muted' : '' %>"><%= value.installmentMonths === 0 ? 'Only cash' : value.installmentMonths + ' months' %></td>
             <td><%= value.productLeftCount %></td>
@@ -127,6 +133,7 @@
                 <option value="DELETE" <%= value.productStatus === 'DELETE' ? 'selected': '' %>>DELETE</option>
               </select>
             </td>
+            <td><button type="button" class="price-deal-button" data-id="<%= value._id %>" data-name="<%= value.productName %>" data-price="<%= value.productPrice %>" data-old-price="<%= typeof value.productOldPrice === 'number' && value.productOldPrice > value.productPrice ? value.productOldPrice : '' %>" aria-label="Edit price / deal for <%= value.productName %>">Price / deal</button></td>
           </tbody>
           <% }) %>
           <!--  LOOP PRODUCTS: END  -->
@@ -271,6 +278,18 @@
       </form>
     </div>
   </div>
+  <dialog id="price-deal-dialog" class="price-deal-dialog" aria-labelledby="price-deal-title" aria-describedby="price-deal-help">
+    <form id="price-deal-form" method="POST">
+      <h2 id="price-deal-title">Price / deal</h2>
+      <p id="price-deal-name"></p>
+      <div class="long-input"><label for="deal-current-price">Current price (USD)</label><input id="deal-current-price" name="productPrice" type="number" min="0" max="10000000" step="0.01" required /></div>
+      <div class="long-input"><label for="deal-old-price">Old price (USD, optional)</label><input id="deal-old-price" name="productOldPrice" type="number" min="0" max="10000000" step="0.01" /></div>
+      <p id="price-deal-help">Old price must be higher than the current price. Leave it empty to remove the deal. A product must have PROCESS status to appear in the public catalog.</p>
+      <button type="button" id="price-clear-deal" class="price-deal-button">Remove deal</button>
+      <p id="price-deal-error" role="alert" hidden></p>
+      <div class="operation-buttons"><button type="button" class="btn btn-light" id="price-deal-cancel">Cancel</button><button type="submit" class="btn btn-primary" id="price-deal-save">Save prices</button></div>
+    </form>
+  </dialog>
   <% } %>
 
   <script type="text/javascript" src="/js/products.js"></script>

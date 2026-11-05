@@ -1,15 +1,43 @@
 import {NextFunction, Request, Response} from "express";
 import { T } from "../libs/types/common";
 import MemberService from "../models/Member.service";
-import { AdminRequest, LoginInput, MemberInput } from "../libs/types/member";
+import { AdminRequest, LoginInput } from "../libs/types/member";
 import { MemberType } from "../libs/enums/member.enum";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import ProductService from "../models/Product.service";
+
+import { csrfToken, regenerateSession } from "../libs/security/csrf";
+import { safeMember } from "../libs/security/member-input";
+import { authCookie } from "../libs/security/config";
+import { sendError, HttpError } from "../libs/security/http";
 
 const memberService = new MemberService();
 const productService = new ProductService();
 
 const storeController: T = {};
+async function restoreStore(req: AdminRequest, res: Response) {
+  if (!req.session.memberId) throw new HttpError(401, 'UNAUTHENTICATED', 'Please log in.');
+  const member = await memberService.getAuthenticatedMember(req.session.memberId, req.session.memberVersion ?? -1);
+  if (member.memberType !== MemberType.STORE) throw new HttpError(403, 'FORBIDDEN', 'Store access is required.');
+  req.member = member;
+  res.locals.member = safeMember(member);
+  res.set('Cache-Control', 'no-store');
+}
+
+// Public Home/login still restore an existing admin session before rendering navigation.
+storeController.retrieveStore = async (req: AdminRequest, res: Response, next: NextFunction) => {
+  if (!req.session.memberId) return next();
+  try { await restoreStore(req, res); next(); }
+  catch (error) {
+    const status = error instanceof HttpError ? error.status : error instanceof Errors ? error.code : undefined;
+    if (status === 401 || status === 403) {
+      delete req.session.memberId; delete req.session.memberVersion;
+      return next();
+    }
+    sendError(res, error);
+  }
+};
+
 storeController.goHome = (req: Request, res: Response) => {
   try {
     console.log('goHome');
@@ -23,20 +51,9 @@ storeController.goHome = (req: Request, res: Response) => {
 };
 
 
-storeController.getSignup = (req: Request, res: Response) => {
+storeController.getLogin = (req: AdminRequest, res: Response) => {
   try {
-    console.log('getSignup');
-    res.render("signup");
-  } catch (err) {
-    console.log("Error, getSignup:", err);
-    res.redirect("/admin");
-
-  }
-};
-
-
-storeController.getLogin = (req: Request, res: Response) => {
-  try {
+    if (req.member) return res.redirect('/admin');
     console.log('getLogin');
     res.render("login");
   } catch (err) {
@@ -46,68 +63,25 @@ storeController.getLogin = (req: Request, res: Response) => {
 };
 
 
-storeController.processSignup = async (req: AdminRequest, res: Response) => {
-  try {
-    console.log('processSignup');
-    // console.log("body:", req.body);
-    // res.send("DONE");
-    const file = req.file;
-    if (!file) throw new Errors(HttpCode.BAD_REQUEST, Message.SOMETHING_WENT_WRONG);
-
-    const newMember: MemberInput = req.body;
-    newMember.memberImage = file?.path;
-    newMember.memberType = MemberType.STORE;
-    const result = await memberService.processSignup(newMember);
-    
-
-    req.session.member = result;
-    req.session.save(function () {
-      res.redirect("/admin/product/all");
-    });
-
-  } catch (err) {
-    console.log("Error, processSignup:", err);
-    const message =
-      err instanceof Errors ? err.message : Message.SOMETHING_WENT_WRONG;
-    res.send(`<script> alert("${message}"); window.location.replace("/admin/signup")</script>`);
-
-  }
-};
-
-
 storeController.processLogin = async (req: AdminRequest, res: Response) => {
   try {
-    console.log('processLogin');
-
-    console.log("body:", req.body);
-    const input: LoginInput = req.body;
-    const result = await memberService.processLogin(input);
-    
-
-    req.session.member = result;
-    req.session.save(function () {
-      res.redirect("/admin/product/all");
-    });
-
-  } catch (err) {
-    console.log("Error, processLogin:", err);
-
-    const message =
-      err instanceof Errors ? err.message : Message.SOMETHING_WENT_WRONG;
-    res.send(`<script> alert("${message}"); window.location.replace("/admin/login")</script>`);
-  }
+    const result = await memberService.processLogin(req.body as LoginInput);
+    await regenerateSession(req);
+    req.session.memberId = String(result._id);
+    req.session.memberVersion = result.authVersion ?? 0;
+    csrfToken(req);
+    await new Promise<void>((resolve, reject) => req.session.save((error) => error ? reject(error) : resolve()));
+    res.redirect('/admin/product/all');
+  } catch (error) { sendError(res, error); }
 };
 
 storeController.logout = async (req: AdminRequest, res: Response) => {
   try {
-    console.log('logout');
-    req.session.destroy(function () {
-      res.redirect("/admin");
-    })
-  } catch (err) {
-    console.log("Error, logout:", err);
-    res.redirect("/admin");
-  }
+    // Destroy only the authenticated admin session; the browser JWT is separate.
+    await new Promise<void>((resolve, reject) => req.session.destroy((error) => error ? reject(error) : resolve()));
+    res.clearCookie('techhome.sid', { ...authCookie(req.app.locals.security), maxAge: undefined });
+    res.redirect('/admin/login');
+  } catch (error) { sendError(res, error); }
 };
 
 storeController.getUsers = async (req: AdminRequest, res: Response) => {
@@ -117,7 +91,7 @@ storeController.getUsers = async (req: AdminRequest, res: Response) => {
       await memberService.getAllUsers();   // ← eski memberService.getUsers() o'rniga
 
     res.render("users", {
-      member: req.session?.member ?? null,   // ← endi member ham uzatiladi
+      member: safeMember(req.member),   // ← endi member ham uzatiladi
       users,
       total,
       activeCount,
@@ -137,7 +111,7 @@ storeController.getAllProducts = async (req: AdminRequest, res: Response) => {
       await productService.getAllProducts();
  
     res.render("products", {
-      member: req.session?.member ?? null,
+      member: safeMember(req.member),
       products,
       total,
       activeCount,
@@ -156,41 +130,18 @@ storeController.updateChosenUser = async (req: Request, res: Response) => {
     console.log('updateChosenUser');
     const result = await memberService.updateChosenUser(req.body);
 
-    res.status(HttpCode.OK).json({ data: result });
-  } catch (err) {
-    console.log("Error, updateChosenUser:", err);
-    if (err instanceof Errors) res.status(err.code).json(err);
-    else res.status(Errors.standard.code).json(Errors.standard);
-  }
+    res.status(HttpCode.OK).json({ data: safeMember(result) });
+  } catch (error) { sendError(res, error); }
 };
 
-storeController.checkAuthSession = async (req: AdminRequest, res: Response) => {
+storeController.checkAuthSession = (req: AdminRequest, res: Response) => {
+  res.set('Cache-Control', 'no-store').json({ member: safeMember(req.member) });
+};
+
+storeController.verifyStore = async (req: AdminRequest, res: Response, next: NextFunction) => {
   try {
-    console.log('checkAuthSession');
-    if (req.session?.member)
-      res.send(`<script> alert("${req.session.member.memberNick}") </script>`);
-      
-    else res.send(`<script> alert("${Message.NOT_AUTHENTICATED}") </script>`);
-  } catch (err) {
-    console.log("Error, checkAuthSession:", err);
-    res.send(err);
-  }
-};
-
-storeController.verifyStore = (
-  req: AdminRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  if (req.session?.member?.memberType === MemberType.STORE) {
-    req.member = req.session.member;
+    await restoreStore(req, res);
     next();
-  } else {
-    const message = Message.NOT_AUTHENTICATED;
-    res.send(
-      `<script> alert("${message}"); window.location.replace('/admin/login'); </script>`
-    );
-  }
+  } catch (error) { sendError(res, error); }
 };
-
 export default storeController;

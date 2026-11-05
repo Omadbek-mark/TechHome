@@ -462,9 +462,8 @@
   transform: translateY(-1px);
 }
 .upload-img-box img {
-  width: 26px;
-  height: 26px;
-  opacity: 0.5;
+  width: 70px;
+  height: 70px;
   object-fit: contain;
   pointer-events: none;
   transition: opacity 0.15s ease;
@@ -487,3 +486,20 @@
   padding-top: 24px;
   border-top: 1px solid var(--line-light);
 }
+
+/* Small price/deal editor; existing create and status controls stay in place. */
+.price-deal-button { border: 1px solid var(--line-light); border-radius: 7px; padding: 7px 10px; color: var(--ink); background: var(--card-light); white-space: nowrap; cursor: pointer; font-size: 12px; }
+.price-deal-button:hover { border-color: var(--accent-blue); }
+.old-product-price { display: block; color: var(--steel); font-size: 12px; }
+.product-deal-badge { display: inline-block; color: #116444; background: #e5f5ed; border-radius: 4px; font-size: 10px; padding: 2px 5px; }
+.product-price-cell [hidden], .price-deal-dialog [hidden], #price-update-status[hidden] { display: none; }
+.price-deal-dialog { width: min(460px, calc(100% - 32px)); max-height: calc(100vh - 40px); overflow-y: auto; padding: 28px; border: 1px solid var(--line-light); border-radius: 14px; color: var(--ink); background: var(--card-light); box-shadow: var(--shadow-lg); }
+.price-deal-dialog:not([open]) { display: none; }
+.price-deal-dialog::backdrop { background: rgba(13, 17, 22, .55); }
+.price-deal-dialog h2 { font-size: 23px; margin: 0 0 8px; }
+#price-deal-name { overflow-wrap: anywhere; color: var(--steel); }
+#price-deal-help { font-size: 12px; color: var(--steel); line-height: 1.6; }
+#price-deal-error { color: #a32929; font-size: 13px; margin: 14px 0 0; }
+#price-update-status { color: #116444; }
+.price-deal-dialog input { width: 100%; min-width: 0; }
+.price-deal-dialog button:disabled { opacity: .6; cursor: wait; }

@@ -1,7 +1,8 @@
+import type { Member } from "../libs/types/member";
 import mongoose, { Schema } from "mongoose";
 import { MemberStatus, MemberType } from "../libs/enums/member.enum";
 
-const memberSchema = new Schema({
+const memberSchema = new Schema<Member>({
     memberType: {
       type: String,
       enum: MemberType,
@@ -48,8 +49,10 @@ const memberSchema = new Schema({
       type: Number,
       default: 0,
     },
+    authVersion: { type: Number, default: 0 },
   },
   { timestamps: true }  // updatedAt, createdAt
 );
 
-export default mongoose.model('Member', memberSchema);
+memberSchema.index({ memberType: 1 }, { unique: true, partialFilterExpression: { memberType: MemberType.STORE } });
+export default mongoose.model<Member>('Member', memberSchema);
