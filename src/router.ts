@@ -4,6 +4,8 @@ import memberController from "./controllers/member.controller";
 import uploader from "./libs/utils/uploader";
 import productController from "./controllers/product.controller";
 import orderController from "./controllers/order.controller";
+import { advisorStatus, askAdvisor } from "./controllers/advisor.controller";
+import { rateLimit } from "express-rate-limit";
 
 /** Member */
 router.get(
@@ -28,6 +30,11 @@ router.post(
   memberController.updateMember
 );
 // router.get("/member/top-users", memberController.getTopUsers); 
+
+/** Public advisor: guest CSRF/session rules still apply to POST. */
+router.get('/ai/status', advisorStatus);
+router.post('/ai/advisor', rateLimit({ windowMs: 60000, limit: 5, standardHeaders: 'draft-8', legacyHeaders: false,
+  message: { code: 'AI_RATE_LIMITED', message: 'Please wait before asking again.' } }), memberController.retrieveAuth, askAdvisor);
 
 /** Product */
 router.get("/product/catalog", productController.getCatalog);

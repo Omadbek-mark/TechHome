@@ -1,3 +1,4 @@
+import type AdvisorService from "./models/Advisor.service";
 import cors from "cors";
 import express, { Request, Response, NextFunction } from "express";
 import path from "path";
@@ -13,7 +14,7 @@ import { csrfProtection, csrfToken } from "./libs/security/csrf";
 import { HttpError, sendError } from "./libs/security/http";
 
 // Importing this module never connects to a database. Tests supply an explicit store.
-export default function createApp(options: { config?: SecurityConfig; store?: session.Store } = {}) {
+export default function createApp(options: { config?: SecurityConfig; store?: session.Store; advisor?: AdvisorService } = {}) {
   const config = options.config ?? loadSecurityConfig();
   let store = options.store;
   if (!store) {
@@ -24,6 +25,8 @@ export default function createApp(options: { config?: SecurityConfig; store?: se
   }
   const app = express();
   app.locals.security = config;
+  // Explicit dependency injection for isolated provider tests; default uses the real Gemini adapter.
+  app.locals.advisor = options.advisor;
   app.disable('x-powered-by');
   if (config.trustProxyHops) app.set('trust proxy', config.trustProxyHops);
   app.use((req, res, next) => {
