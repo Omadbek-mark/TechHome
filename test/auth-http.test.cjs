@@ -25,7 +25,6 @@ async function setup(t, production = false) {
   const uploadsRoot = await mkdtemp(path.join(tmpdir(), 'techhome-auth-upload-'));
   const config = { production, origins: [origin, 'http://127.0.0.1:3002'], sessionSecret: 'offline-http-session-key-never-use-for-deployment', trustProxyHops: production ? 1 : 0, uploadsRoot };
   const app = createApp({ config, store: new session.MemoryStore() });
-  app.set('views', path.resolve('src/views'));
   const server = app.listen(0, '127.0.0.1');
   await once(server, 'listening');
   t.after(async () => { await new Promise((done) => server.close(done)); await rm(uploadsRoot, { recursive: true, force: true }); });
@@ -195,6 +194,7 @@ after(() => assert.equal(mongoose.connection.readyState, 0));
 test('admin HTML login renders a CSRF form and contains no public admin signup link', async (t) => {
   const { agent } = await setup(t);
   const response = await agent.get('/admin/login').expect(200);
+  await agent.get('/css/main.css').expect('Content-Type', /text\/css/).expect(200);
   assert.match(response.text, /name="_csrf" value="[a-f0-9]{64}"/);
   assert.doesNotMatch(response.text, /href="\/admin\/signup"/);
 });

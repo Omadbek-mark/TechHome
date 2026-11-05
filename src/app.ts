@@ -7,28 +7,37 @@ import routerAdmin from "./router-admin";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import session from "express-session";
-import ConnectMongoDB from "connect-mongodb-session";
 import { rateLimit } from "express-rate-limit";
 import { loadSecurityConfig, SecurityConfig } from "./libs/security/config";
 import { csrfProtection, csrfToken } from "./libs/security/csrf";
 import { HttpError, sendError } from "./libs/security/http";
 
-// Importing this module never connects to a database. Tests supply an explicit store.
-export default function createApp(options: { config?: SecurityConfig; store?: session.Store; advisor?: AdvisorService } = {}) {
+interface AppOptions {
+  config?: SecurityConfig;
+  store: session.Store;
+  advisor?: AdvisorService;
+  isReady?: () => Promise<boolean>;
+}
+
+export default function createApp(options: AppOptions) {
   const config = options.config ?? loadSecurityConfig();
-  let store = options.store;
-  if (!store) {
-    if (!process.env.MONGO_URL) throw new Error("MONGO_URL is required.");
-    const MongoDBStore = ConnectMongoDB(session);
-    store = new MongoDBStore({ uri: process.env.MONGO_URL, collection: "sessions" });
-    store.on('error', () => console.error('Session storage unavailable.'));
-  }
+  const { store, isReady } = options;
   const app = express();
   app.locals.security = config;
   // Explicit dependency injection for isolated provider tests; default uses the real Gemini adapter.
   app.locals.advisor = options.advisor;
   app.disable('x-powered-by');
   if (config.trustProxyHops) app.set('trust proxy', config.trustProxyHops);
+  // Container probes use internal HTTP and never need a session.
+  app.get('/health', (_req, res) => {
+    res.set('Cache-Control', 'no-store').json({ status: 'ok' });
+  });
+  app.get('/ready', async (_req, res) => {
+    let ready = false;
+    try { ready = await isReady?.() ?? false; } catch { /* Dependency is unavailable. */ }
+    res.set('Cache-Control', 'no-store').status(ready ? 200 : 503)
+      .json({ status: ready ? 'ready' : 'unavailable' });
+  });
   app.use((req, res, next) => {
     res.set('X-Content-Type-Options', 'nosniff');
     if (config.production && !req.secure) return next(new HttpError(400, 'HTTPS_REQUIRED', 'HTTPS is required.'));

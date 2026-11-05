@@ -48,7 +48,7 @@
 - `createApp` importi DBga ulanmaydi; default factory/store yoki `start` esa ulanadi. JWT faqat `sub/version` saqlaydi; role/status har protected requestda DBdan. Logout barcha API JWT sessiyalarini revocation version orqali bekor qiladi.
 - POST’larda allowlisted Origin/Referer va synchronizer CSRF token shart; `/member/csrf`dan olinadi. Login session/CSRF’ni yangilaydi; eski JWT/admin sessionlar qayta login talab qiladi. [Auth kontrakti](docs/auth-security.md).
 - Ochiq admin signup yo‘q. `npm run bootstrap:store -- --confirm-bootstrap` DBga yozadigan qo‘lda bajariladigan amal: alohida foydalanuvchi ko‘rsatmasisiz ishga tushirmang. Xuddi shunday production indeks/migratsiya amallari alohida ko‘rsatma bilan.
-- 7-bosqichda lint, compiled JS start, EJS/public assets, health/readiness, graceful shutdown, Docker va CI tekshiruvlari qo‘shiladi.
+- Production compiled JS, EJS/public assets, health/readiness, graceful shutdown va Docker/CI bilan ishlaydi. [Deploy qo‘llanmasi](docs/production-deploy.md).
 - Dependencies’ni kichik guruhlarda yangilang; `npm audit fix --force` ishlatmang. Bajarilmagan checkni yoki eski audit natijasini yangi natija sifatida ko‘rsatmang.
 - Coolify umumiy VPS’da TechHome alohida servis/baza/volume bilan ishlaydi. Hotelia, boshqa loyihalar, umumiy proxy/firewallga tegmang. Og‘ir build/deploylarni ketma-ket bajaring.
 - Backend deploy va health tekshiruvi frontend deploydan oldin. Backup/restore va rollback tekshirilmaguncha productionga tayyor deb aytmang.

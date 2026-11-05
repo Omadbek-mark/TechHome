@@ -30,7 +30,7 @@
 - Admin logout faqat `POST /admin/logout` + CSRF; eski GET linklari formga almashtirilgan. `check-me` protected safe JSON, user matnidan inline script yasamaydi.
 - Admin account update faqat USER accountining valid statusini o‘zgartiradi va authVersion’ni oshiradi. Role/password/points yoki STORE accountni shu endpoint orqali o‘zgartirib bo‘lmaydi.
 - Admin multipart form JS orqali CSRF header bilan yuboradi; product create javobi `{ created: true }`. Muvaffaqiyatdan keyin admin katalogiga qaytiladi; server bergan script eval qilinmaydi.
-- Birinchi STORE: faqat **alohida ko‘rsatma bilan** `BOOTSTRAP_NICK`, `BOOTSTRAP_PHONE`, `BOOTSTRAP_PASSWORD`ni xavfsiz lokal/runtime env’da berib, `npm run bootstrap:store -- --confirm-bootstrap`. Bu buyruq DBga yozadi va avtomatik ishlamaydi. Existing STORE bo‘lsa rad etadi; partial unique STORE indeksi concurrent creation’ni cheklaydi.
+- Birinchi STORE: faqat **alohida ko‘rsatma bilan** `BOOTSTRAP_NICK`, `BOOTSTRAP_PHONE`, `BOOTSTRAP_PASSWORD`ni xavfsiz lokal/runtime env’da berib, build’dan keyin `npm run bootstrap:store -- --confirm-bootstrap`. Bu buyruq DBga yozadi va avtomatik ishlamaydi. Existing STORE bo‘lsa rad etadi; partial unique STORE indeksi concurrent creation’ni cheklaydi.
 - Existing bazadagi avval yaratilgan STORE accountlari va duplicate index holati real DBda tekshirilmadi. Ularni avtomatik downgrade/delete qilish yo‘q; stagingdan oldin alohida audit/migratsiya kerak. Bootstrap bu ish davomida bajarilmadi.
 
 ## Upload

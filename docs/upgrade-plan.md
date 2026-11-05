@@ -21,7 +21,7 @@ Foydalanuvchining keyingi ko‘rsatmasi bilan package manager tartibi yangilandi
 | 4 — Katalog, chegirma, comparison | Foydalanuvchi tasdiqladi; [tarixiy hisobot](stage-4-summary.md) |
 | 5 — Responsive va tillar | Foydalanuvchi tasdiqladi; [tarixiy hisobot](stage-5-summary.md) |
 | 6 — Gemini maslahatchisi | Lokal implementatsiya/testlar yakunlandi; [hisobot](stage-6-summary.md), review kutilmoqda. Haqiqiy provider uch tilli smoke testi 2026-11-04 kuni o‘tdi; umumiy staging oqimi keyin |
-| 7 — Docker va CI | Boshlanmagan |
+| 7 — Docker va CI | Lokal build va Docker smoke sinovi o‘tdi. GitHub CI run va staging kutilmoqda. |
 | 8 — Staging va yakuniy review | Boshlanmagan; serverga yozish alohida ko‘rsatma bilan |
 | 9 — Production | Boshlanmagan; alohida release tasdig‘i talab qilinadi |
 

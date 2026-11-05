@@ -26,9 +26,9 @@ npm run test:integration
 
 ## Lokal server
 
-`npm run start:dev` yoki `npm start` `.env`dagi MongoDBga ulanadi. Faqat alohida development bazasi bilan ishlating; test uchun jonli serverni boshlamang. `.env.example`dagi sozlamalar, mustaqil kamida 32 belgilik JWT/session secretlari, frontend/API uchun bir xil hostname va production HTTPS shart. [Auth sozlash va kontrakt](docs/auth-security.md). Env qiymatlarini log, hujjat yoki Gitga chiqarmang.
+`npm run start:dev` yoki build’dan keyin `npm start` `.env`dagi MongoDBga ulanadi. Faqat alohida development bazasi bilan ishlating; test uchun jonli serverni boshlamang. `.env.example`dagi sozlamalar, mustaqil kamida 32 belgilik JWT/session secretlari, frontend/API uchun bir xil hostname va production HTTPS shart. [Auth sozlash va kontrakt](docs/auth-security.md). Env qiymatlarini log, hujjat yoki Gitga chiqarmang.
 
-Bu bosqichda `npm run build` faqat JS chiqaradi; EJS/public assets va compiled production start 7-bosqichda tayyorlanadi. Hozir build’dan o‘tish deployga tayyorlik emas.
+`npm run build` compiled JS, EJS va statik fayllarni `dist`ga chiqaradi. Production sozlamalari, health endpointlari va staging tartibi [deploy qo‘llanmasida](docs/production-deploy.md).
 
 ## Ma’lumot va API mosligi
 

@@ -2,7 +2,7 @@
   "name": "TechHome",
   "version": "1.0.0",
   "description": "This is TechHome project backend",
-  "main": "src/server.ts",
+  "main": "dist/server.js",
   "private": true,
   "engines": {
     "node": ">=22.13.0 <23",
@@ -10,12 +10,12 @@
   },
   "packageManager": "npm@10.9.8",
   "scripts": {
-    "start": "ts-node src/server.ts",
+    "start": "node dist/server.js",
     "start:dev": "nodemon --exec ts-node src/server.ts",
-    "build": "tsc",
+    "build": "tsc && node scripts/copy-assets.cjs",
     "typecheck": "tsc --noEmit",
     "test": "npm run build && node --test test/*.test.cjs test/*.integration.cjs",
-    "bootstrap:store": "ts-node src/scripts/bootstrap-store.ts",
+    "bootstrap:store": "node dist/scripts/bootstrap-store.js",
     "test:unit": "npm run build && node --test test/*.test.cjs",
     "test:integration": "npm run build && node --test --test-concurrency=1 test/*.integration.cjs"
   },
