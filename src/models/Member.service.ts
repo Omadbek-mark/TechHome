@@ -117,18 +117,31 @@ class MemberService {
     }
   }
 
-  /** Only used by the explicit bootstrap CLI, never an HTTP route. */
+  public async hasStore(): Promise<boolean> {
+    return Boolean(await this.memberModel.exists({ memberType: MemberType.STORE }).exec());
+  }
+
   public async bootstrapStore(input: MemberInput): Promise<Member> {
-    if (await this.memberModel.findOne({ memberType: MemberType.STORE }).exec()) {
-      throw new HttpError(409, "STORE_EXISTS", "A store account already exists.");
+    if (await this.hasStore()) {
+      throw new HttpError(409, "STORE_EXISTS", "An admin account already exists.");
     }
     const fields = signupFields(input);
     const memberPassword = await bcrypt.hash(fields.memberPassword, 12);
-    const result = await this.memberModel.create({ ...fields, memberPassword, memberType: MemberType.STORE,
-      memberStatus: MemberStatus.ACTIVE, memberPoints: 0, authVersion: 0 });
-    const member = result.toJSON<Member>();
-    delete member.memberPassword;
-    return member;
+    // Ensure the partial unique STORE index exists before either bootstrap entry point writes.
+    await this.memberModel.createIndexes();
+    try {
+      const result = await this.memberModel.create({ ...fields, memberPassword, memberType: MemberType.STORE,
+        memberStatus: MemberStatus.ACTIVE, memberPoints: 0, authVersion: 0 });
+      const member = result.toJSON<Member>();
+      delete member.memberPassword;
+      return member;
+    } catch (error) {
+      if (error instanceof Error && "code" in error && error.code === 11000) {
+        if (await this.hasStore()) throw new HttpError(409, "STORE_EXISTS", "An admin account already exists.");
+        throw new HttpError(409, "ACCOUNT_EXISTS", "Username or phone number is already in use.");
+      }
+      throw error;
+    }
   }
 
   public async processLogin(input: LoginInput): Promise<Member> {

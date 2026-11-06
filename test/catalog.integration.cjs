@@ -156,3 +156,54 @@ test('admin price/deal changes validate both prices, recalculate installments, a
   assert.equal((await agent.get('/product/catalog?onSale=true').expect(200)).body.total,0);
   const saved = await Product.findById(p._id).lean(); assert.equal(saved.productOldPrice,undefined); assert.equal(saved.productLeftCount,3); assert.equal(saved.productStatus,'PROCESS');
 });
+
+test('admin signup keeps its link and creates at most one STORE across concurrent requests', async t => {
+  const createApp = require('../dist/app').default;
+  const session = require('express-session');
+  const http = require('supertest');
+  const origin = 'http://127.0.0.1:3000';
+  const app = createApp({
+    config: { production: false, origins: [origin], sessionSecret: 'admin-signup-test-session-key-only', trustProxyHops: 0, uploadsRoot: tmpdir() },
+    store: new session.MemoryStore(),
+  });
+  const server = app.listen(0, '127.0.0.1');
+  await require('node:events').once(server, 'listening');
+  t.after(() => new Promise(done => server.close(done)));
+
+  const previousCode = process.env.ADMIN_SETUP_CODE;
+  t.after(() => {
+    if (previousCode === undefined) delete process.env.ADMIN_SETUP_CODE;
+    else process.env.ADMIN_SETUP_CODE = previousCode;
+  });
+  delete process.env.ADMIN_SETUP_CODE;
+
+  const agent = http.agent(server);
+  const csrf = (await agent.get('/member/csrf')).body.csrfToken;
+  const credentials = { memberNick: 'first-admin', memberPhone: '998900000020', memberPassword: 'fixture-password' };
+  const submit = (body) => agent.post('/admin/signup').set('Origin', origin).type('form').send({ _csrf: csrf, ...body });
+  await agent.get('/admin/login').expect(200).expect(/href="\/admin\/signup"/);
+  await agent.get('/admin/signup').expect(200).expect(/setup is unavailable/);
+  await submit(credentials).expect(503);
+
+  process.env.ADMIN_SETUP_CODE = 'test-setup-code';
+  await agent.get('/admin/signup').expect(200).expect(/name="setupCode"/);
+  await agent.post('/admin/signup').set('Origin', origin).send(credentials).expect(403);
+  await submit({ ...credentials, setupCode: 'incorrect' }).expect(403);
+  assert.equal(await Member.countDocuments({ memberType: 'STORE' }), 0);
+
+  const responses = await Promise.all([
+    submit({ ...credentials, setupCode: 'test-setup-code' }),
+    submit({ ...credentials, memberNick: 'second-admin', memberPhone: '998900000021', setupCode: 'test-setup-code' }),
+  ]);
+  assert.deepEqual(responses.map(response => response.status).sort(), [303, 409]);
+  assert.equal(responses.find(response => response.status === 303).headers.location, '/admin/login');
+  assert.match(responses.find(response => response.status === 409).text, /An admin account already exists/);
+  assert.equal(await Member.countDocuments({ memberType: 'STORE' }), 1);
+
+  await agent.get('/admin/login').expect(200).expect(/href="\/admin\/signup"/);
+  await agent.get('/admin/signup').expect(200).expect(/An admin account already exists/);
+  await submit({}).expect(409).expect(/An admin account already exists/);
+  const admin = await Member.findOne({ memberType: 'STORE' });
+  await agent.post('/admin/login').set('Origin', origin).set('X-CSRF-Token', csrf)
+    .send({ memberNick: admin.memberNick, memberPassword: credentials.memberPassword }).expect(302);
+});

@@ -72,7 +72,7 @@ export default function createApp(options: AppOptions) {
   });
   const loginLimit = rateLimit({ windowMs: 15 * 60 * 1000, limit: 10, standardHeaders: 'draft-8', legacyHeaders: false,
     message: { code: 'RATE_LIMITED', message: 'Too many attempts. Please try again later.' } });
-  for (const route of ['/member/login', '/member/signup', '/admin/login']) app.post(route, loginLimit);
+  for (const route of ['/member/login', '/member/signup', '/admin/login', '/admin/signup']) app.post(route, loginLimit);
   app.set('views', path.join(__dirname, 'views'));
   app.set('view engine', 'ejs');
   app.use('/admin', routerAdmin);

@@ -9,7 +9,9 @@ routerAdmin.get('/', storeController.retrieveStore, storeController.goHome);
 routerAdmin
   .get('/login', storeController.retrieveStore, storeController.getLogin)
   .post('/login', storeController.processLogin);
-routerAdmin.all('/signup', (_req, res) => res.status(404).json({ code: 'NOT_FOUND', message: 'Not found.' }));
+routerAdmin
+  .get('/signup', storeController.getSignup)
+  .post('/signup', storeController.processSignup);
 routerAdmin.post('/logout', storeController.verifyStore, storeController.logout);
 routerAdmin.get('/check-me', storeController.verifyStore, storeController.checkAuthSession);
 

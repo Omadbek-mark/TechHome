@@ -133,12 +133,10 @@ test('profile input cannot update role, points, password or arbitrary image path
   assert.deepEqual(update.$set, { memberNick: 'updated' });
 });
 
-test('admin login requires actual STORE role and open admin signup is removed', async (t) => {
+test('admin login requires actual STORE role', async (t) => {
   const context = await setup(t);
   const csrf = await context.token();
   await context.agent.post('/admin/login').set('Origin', origin).set('X-CSRF-Token', csrf).type('form').send({ memberNick: 'fixture', memberPassword: 'unused' }).expect(403);
-  await context.agent.get('/admin/signup').expect(404);
-  await context.agent.post('/admin/signup').set('Origin', origin).set('X-CSRF-Token', csrf).send({}).expect(404);
   await context.agent.get('/admin/check-me').expect(401);
 });
 
@@ -191,12 +189,12 @@ test('valid images are decoded/re-encoded with generated safe paths; spoofed and
 
 after(() => assert.equal(mongoose.connection.readyState, 0));
 
-test('admin HTML login renders a CSRF form and contains no public admin signup link', async (t) => {
+test('admin HTML login renders a CSRF form and keeps the admin signup link', async (t) => {
   const { agent } = await setup(t);
   const response = await agent.get('/admin/login').expect(200);
   await agent.get('/css/main.css').expect('Content-Type', /text\/css/).expect(200);
   assert.match(response.text, /name="_csrf" value="[a-f0-9]{64}"/);
-  assert.doesNotMatch(response.text, /href="\/admin\/signup"/);
+  assert.match(response.text, /href="\/admin\/signup"/);
 });
 
 test('invalid credential objects and overlong bcrypt passwords are rejected without querying MongoDB', async (t) => {
@@ -211,7 +209,7 @@ test('invalid credential objects and overlong bcrypt passwords are rejected with
 
 test('store bootstrap refuses an existing store and never silently changes its role', async () => {
   const service = new MemberService();
-  service.memberModel = { findOne: () => ({ exec: async () => ({ ...fixture, memberType: 'STORE' }) }) };
+  service.memberModel = { exists: () => ({ exec: async () => ({ _id: id }) }) };
   await assert.rejects(service.bootstrapStore({}), (error) => error.status === 409);
 });
 

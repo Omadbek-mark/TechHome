@@ -1,7 +1,6 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import MemberService from '../models/Member.service';
-import MemberModel from '../schema/Member.model';
 
 // Never run automatically on app startup, install, build or test.
 async function main() {
@@ -10,8 +9,6 @@ async function main() {
   const { MONGO_URL, BOOTSTRAP_NICK, BOOTSTRAP_PHONE, BOOTSTRAP_PASSWORD } = process.env;
   if (!MONGO_URL || !BOOTSTRAP_NICK || !BOOTSTRAP_PHONE || !BOOTSTRAP_PASSWORD) throw new Error('Bootstrap environment is incomplete.');
   await mongoose.connect(MONGO_URL);
-  // Enforce single-store uniqueness before creation, including concurrent CLI attempts.
-  await MemberModel.createIndexes();
   await new MemberService().bootstrapStore({ memberNick: BOOTSTRAP_NICK, memberPhone: BOOTSTRAP_PHONE, memberPassword: BOOTSTRAP_PASSWORD });
   console.info('Store account created.');
 }

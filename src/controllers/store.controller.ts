@@ -1,3 +1,4 @@
+import { createHash, timingSafeEqual } from "node:crypto";
 import {NextFunction, Request, Response} from "express";
 import { T } from "../libs/types/common";
 import MemberService from "../models/Member.service";
@@ -61,6 +62,36 @@ storeController.getLogin = (req: AdminRequest, res: Response) => {
   }
 };
 
+
+storeController.getSignup = async (_req: Request, res: Response) => {
+  try {
+    const exists = await memberService.hasStore();
+    const message = exists ? 'An admin account already exists.' :
+      process.env.ADMIN_SETUP_CODE ? undefined : 'Admin signup setup is unavailable. Contact the server operator.';
+    res.set('Cache-Control', 'no-store').render('signup', { message, showForm: !message });
+  } catch (error) { sendError(res, error); }
+};
+
+storeController.processSignup = async (req: Request, res: Response) => {
+  try {
+    if (await memberService.hasStore()) throw new HttpError(409, 'STORE_EXISTS', 'An admin account already exists.');
+    const expected = process.env.ADMIN_SETUP_CODE;
+    if (!expected) throw new HttpError(503, 'SETUP_DISABLED', 'Admin signup setup is unavailable. Contact the server operator.');
+    const provided = req.body?.setupCode;
+    const digest = (value: string) => createHash('sha256').update(value).digest();
+    if (typeof provided !== 'string' || provided.length > 256 || !timingSafeEqual(digest(provided), digest(expected))) {
+      throw new HttpError(403, 'INVALID_SETUP_CODE', 'The setup code is incorrect.');
+    }
+    await memberService.bootstrapStore(req.body);
+    res.redirect(303, '/admin/login');
+  } catch (error) {
+    if (!(error instanceof HttpError)) return sendError(res, error);
+    res.set('Cache-Control', 'no-store').status(error.status).render('signup', {
+      message: error.message,
+      showForm: error.code !== 'STORE_EXISTS' && error.code !== 'SETUP_DISABLED',
+    });
+  }
+};
 
 storeController.processLogin = async (req: AdminRequest, res: Response) => {
   try {

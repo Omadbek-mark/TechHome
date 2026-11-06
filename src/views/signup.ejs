@@ -1,0 +1,41 @@
+<%- include('includes/header') %>
+
+<link rel="stylesheet" type="text/css" href="/css/login.css" />
+
+<body>
+  <div class="login-container">
+    <div class="login-frame">
+      <div class="login-top">
+        <span>Sign up</span>
+        <div><a href="/admin">Home</a> · <a href="/admin/login">Login</a></div>
+        <% if (message) { %><p role="status"><%= message %></p><% } %>
+      </div>
+      <% if (showForm) { %>
+        <form action="/admin/signup" method="POST">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <div class="login-input-frame">
+            <div class="login-input-container">
+              <label for="signup-nick">Store username</label>
+              <input id="signup-nick" name="memberNick" autocomplete="username" required />
+            </div>
+            <div class="login-input-container">
+              <label for="signup-phone">Phone</label>
+              <input id="signup-phone" name="memberPhone" type="tel" autocomplete="tel" required />
+            </div>
+            <div class="login-input-container">
+              <label for="signup-password">Password</label>
+              <input id="signup-password" name="memberPassword" type="password" autocomplete="new-password" required />
+            </div>
+            <div class="login-input-container">
+              <label for="signup-code">Setup code</label>
+              <input id="signup-code" name="setupCode" type="password" autocomplete="off" required />
+            </div>
+          </div>
+          <button class="login-btn btn" type="submit">Sign up</button>
+        </form>
+      <% } %>
+    </div>
+  </div>
+</body>
+
+<%- include('includes/footer') %>
