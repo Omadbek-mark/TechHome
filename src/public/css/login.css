@@ -1,143 +1,129 @@
 .login-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
+  min-height: calc(100vh - 60px);
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-  animation: gradient 15s ease infinite;
-  -webkit-animation: gradient 15s ease infinite;
-  background-size: 200% 200%;
-}
-
-.login-container a {
-  text-decoration: none;
-  color: black;
-}
-
-.login-container .login-frame {
+  padding: 40px 16px;
   position: relative;
-  width: 420px;
-  height: auto;
-  display: flex;
-  flex-direction: column;
-  border-radius: 10px;
-  background: #ffffff;
-  padding: 25px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(61,107,255,0.22), transparent 42%),
+    radial-gradient(circle at 82% 78%, rgba(255,159,28,0.14), transparent 40%),
+    linear-gradient(160deg, var(--panel-dark) 0%, var(--panel-dark-2) 55%, #20262E 100%);
 }
 
-.login-container .login-frame .login-top {
-  position: relative;
-  width: 100%;
-  height: auto;
-  display: flex;
-  flex-direction: column;
+/* faint instrument grid */
+.login-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(circle at 50% 40%, #000 0%, transparent 70%);
+  pointer-events: none;
 }
 
-.login-container .login-top span {
-  font-family: "Poppins";
-  font-style: normal;
+/* wordmark */
+.login-container::after {
+  content: "TECHHOME";
+  position: fixed;
+  top: 78px;
+  left: 40px;
+  opacity: 0.55;
+  font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
-  font-size: 30px;
-  line-height: 34px;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+  color: #fff;
 }
 
-.login-container .login-top p {
-  margin-top: 15px;
-  font-family: "Poppins";
-  font-style: normal;
-  font-weight: 400;
-  font-size: 15px;
-  line-height: 26px;
-}
-
-.login-container .login-top div {
-  font-family: "Poppins";
-  font-style: normal;
-  font-weight: 400;
-  font-size: 15px;
-  line-height: 26px;
-}
-
-.login-container .login-frame .login-input-frame {
+.login-frame {
   position: relative;
-  width: 100%;
-  height: auto;
-  display: flex;
-  flex-direction: column;
+  width: 400px;
+  max-width: 100%;
+  background: rgba(27,32,39,0.72);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 16px;
+  padding: 40px 36px;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.03) inset;
 }
 
-.login-container .login-input-container {
-  position: relative;
-  margin-top: 15px;
-  width: 100%;
-  height: auto;
-  display: flex;
-  flex-direction: column;
+/* corner instrument brackets */
+.login-frame::before, .login-frame::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--accent-blue);
+  opacity: 0.7;
 }
+.login-frame::before { top: -1px; left: -1px; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
+.login-frame::after { bottom: -1px; right: -1px; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
 
-.login-container .login-input-container label {
-  margin-bottom: 0px;
-  font-family: "Poppins";
-  font-style: normal;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 18px;
+.login-top { position: relative; }
+.login-top span {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 26px;
+  display: block;
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+  color: #fff;
 }
+.login-top span::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-amber);
+  box-shadow: 0 0 8px var(--accent-amber);
+  margin-right: 10px;
+  vertical-align: middle;
+}
+.login-top div { color: var(--steel-light); font-size: 13px; margin-bottom: 4px; }
+.login-top p { color: var(--steel-light); font-size: 13px; margin-bottom: 30px; }
+.login-top a { font-weight: 600; color: var(--accent-blue) !important; }
+.login-top a:hover { color: #6d8bff !important; }
 
-.login-container .login-input-container input {
-  position: relative;
-  margin-top: 10px;
-  padding-left: 20px;
-  width: 100%;
-  height: 55px;
-  background: #f6f5f5;
-  border: 1px solid #dddddd;
+.login-input-frame { display: flex; flex-direction: column; gap: 18px; margin-bottom: 28px; }
+.login-input-container { display: flex; flex-direction: column; gap: 7px; }
+.login-input-container label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px; font-weight: 600; color: var(--steel-light);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+.login-input-container input {
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: 8px;
+  padding: 13px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  background: rgba(13,17,22,0.55);
+  color: #fff;
+}
+.login-input-container input::placeholder { color: var(--steel); }
+.login-input-container input:focus {
+  background: rgba(13,17,22,0.8);
+  border-color: var(--accent-blue) !important;
+  box-shadow: 0 0 0 3px rgba(61,107,255,0.22) !important;
 }
 
-.login-container .login-frame .login-btn {
-  position: relative;
-  margin-top: 25px;
+.login-btn {
   width: 100%;
-  height: 70px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #33a0ff;
-  border-radius: 10px;
-  font-family: "Nunito";
-  font-style: normal;
-  font-weight: 800;
-  font-size: 24px;
-  line-height: 33px;
-  letter-spacing: -0.02em;
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--accent-blue), #2952D6);
+  color: #fff;
+  border: none;
+  padding: 14px;
+  font-weight: 600;
+  font-size: 14.5px;
+  border-radius: 8px;
+  box-shadow: 0 8px 22px rgba(61,107,255,0.38);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
 }
-
-/* Background animation */
-@-webkit-keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
+.login-btn:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(61,107,255,0.46); filter: brightness(1.06); }
+.login-btn:active { transform: translateY(0); }

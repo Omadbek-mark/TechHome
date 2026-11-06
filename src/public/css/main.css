@@ -1,7 +1,180 @@
-html,
-body {
-  padding: 0;
-  margin: 0;
-  height: 100%;
-  width: 100%;
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --panel-dark: #14181D;
+  --panel-dark-2: #1B2027;
+  --steel: #7C8894;
+  --steel-light: #AEB6BF;
+  --bg-light: #EEF0F3;
+  --card-light: #FFFFFF;
+  --accent-blue: #3D6BFF;
+  --accent-blue-dark: #2952D6;
+  --accent-amber: #FF9F1C;
+  --accent-green: #1DAE73;
+  --accent-red: #E24B4A;
+  --ink: #10151A;
+  --line: rgba(255,255,255,0.08);
+  --line-light: rgba(13,17,22,0.09);
+  --shadow-sm: 0 1px 2px rgba(13,17,22,0.06), 0 1px 1px rgba(13,17,22,0.04);
+  --shadow-md: 0 8px 24px rgba(13,17,22,0.08), 0 2px 6px rgba(13,17,22,0.04);
+  --shadow-lg: 0 20px 48px rgba(13,17,22,0.14), 0 6px 16px rgba(13,17,22,0.06);
+  --radius: 10px;
 }
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-light);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { text-decoration: none; transition: color .15s ease; }
+
+::selection { background: rgba(61,107,255,0.18); }
+
+/* ---- Shared nav bar (control strip) ---- */
+.navigation-menu {
+  background: var(--panel-dark);
+  border-bottom: 1px solid var(--line);
+  padding: 0 12px;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.4);
+}
+.navigation-menu .nav {
+  max-width: 1080px;
+  margin: 0 auto;
+  height: 60px;
+  align-items: center;
+}
+.navigation-menu .nav-link {
+  position: relative;
+  color: var(--steel-light) !important;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 8px 16px !important;
+  border-bottom: 2px solid transparent;
+  transition: color .15s ease, border-color .15s ease;
+}
+.navigation-menu .nav-link:hover { color: #fff !important; }
+.navigation-menu .nav-link.active { color: #fff !important; border-bottom-color: var(--accent-blue); }
+
+/* ---- Shared card surface ---- */
+.surface-card {
+  background: var(--card-light);
+  border: 1px solid var(--line-light);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+}
+
+/* ---- Shared table look ---- */
+.table.techhome-table {
+  background: var(--card-light);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--line-light);
+  margin-bottom: 0;
+}
+.table.techhome-table thead th {
+  background: var(--panel-dark);
+  color: var(--steel-light);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 500;
+  border: none;
+  padding: 14px 16px;
+}
+.table.techhome-table tbody { transition: background .12s ease; }
+.table.techhome-table tbody:hover { background: #F7F9FC; }
+.table.techhome-table td {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13.5px;
+  vertical-align: middle;
+  padding: 13px 16px;
+  border-top: 1px solid var(--line-light);
+}
+
+.spec-select {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--line-light);
+  border-radius: 6px;
+  padding: 6px 10px;
+  background: var(--card-light);
+  cursor: pointer;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.spec-select:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(61,107,255,0.14);
+}
+.spec-select[data-status="PROCESS"], .spec-select[data-status="ACTIVE"] { color: var(--accent-green); }
+.spec-select[data-status="PAUSE"] { color: var(--accent-amber); }
+.spec-select[data-status="DELETE"], .spec-select[data-status="BLOCKED"] { color: var(--accent-red); }
+
+/* ---- Shared buttons ---- */
+.btn {
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em;
+  padding: 10px 20px !important;
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease !important;
+  border: none !important;
+}
+.btn-primary {
+  background: var(--accent-blue) !important;
+  box-shadow: 0 4px 12px rgba(61,107,255,0.28);
+}
+.btn-primary:hover { background: var(--accent-blue-dark) !important; transform: translateY(-1px); box-shadow: 0 8px 20px rgba(61,107,255,0.34); }
+.btn-primary:active { transform: translateY(0); }
+.btn-danger {
+  background: var(--card-light) !important;
+  color: var(--accent-red) !important;
+  border: 1px solid rgba(226,75,74,0.35) !important;
+  box-shadow: none;
+}
+.btn-danger:hover { background: rgba(226,75,74,0.06) !important; }
+
+/* ---- Shared header label style ---- */
+.section-eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.section-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 26px;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+/* ---- Shared input styling ---- */
+input[type="text"], input[type="password"], input[type="number"], textarea, select {
+  font-family: 'Inter', sans-serif;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--accent-blue) !important;
+  box-shadow: 0 0 0 3px rgba(61,107,255,0.12);
+}
+
+/* POST logout retains the original navigation link appearance. */
+.admin-nav-links form { margin: 0; display: flex; }
+.admin-logout { appearance: none; background: none; border: 0; cursor: pointer; }
+.admin-nav-links .admin-logout { color: var(--steel-light); font: inherit; font-size: 14px; font-weight: 500; padding: 10px 16px; border-radius: 6px; }
+.admin-nav-links .admin-logout:hover { color: #fff; background: rgba(255,255,255,.05); }

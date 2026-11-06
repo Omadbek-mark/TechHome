@@ -1,16 +1,9 @@
-export enum ProductSize {
-  SMALL = "SMALL",
-  NORMAL = "NORMAL",
-  LARGE = "LARGE",
-  SET = "SET"
-}
-
-export enum ProductVolume {
-  HALF = 0.5,
-  ONE = 1,
-  ONE_POINT_TWO = 1.2,
-  ONE_POINT_FIVE = 1.5,
-  TWO = 2
+export enum ProductCategory {
+  KITCHEN = "KITCHEN",
+  LAUNDRY = "LAUNDRY",
+  CLIMATE = "CLIMATE",
+  CLEANING = "CLEANING",
+  ENTERTAINMENT = "ENTERTAINMENT"
 }
 
 export enum ProductStatus {
@@ -19,10 +12,23 @@ export enum ProductStatus {
   DELETE = "DELETE",
 }
 
-export enum ProductCollection {
-  DISH = 'DISH',
-  SALAD = "SALAD", 
-  DESSERT = "DESSERT",
-  DRINK = "DRINK",
-  OTHER = "OTHER",
+export enum WarrantyYears {
+  NO_WARRANTY = 0,
+  ONE_YEAR = 1,
+  TWO_YEARS = 2, 
+  THREE_YEARS = 3,
+}
+
+export enum InstallmentMonths {
+  CASH_ONLY = 0,
+  SIX = 6,
+  TWELWE = 12,
+  TVENTY_FOUR = 24,
+}
+
+export enum EnergyClass {
+  A = "A",
+  A_PLUS = "A+",
+  A_TWO_PLUS = "A++",
+  A_THREE_PLUS = "A+++",
 }

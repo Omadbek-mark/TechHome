@@ -3,84 +3,121 @@
 <link rel="stylesheet" type="text/css" href="/css/users.css" />
 
 <body>
-  <div class="users-container">
-    <% if(!member) { %>
-    <div class="navigation-menu">
-      <ul class="nav justify-content-center">
-        <li class="nav-item" style="cursor: pointer">
-          <a class="nav-link active" href="/admin/">Home</a>
-        </li>
-        <li class="nav-item" style="cursor: pointer">
-          <a class="nav-link" href="/admin/signup">SignUp</a>
-        </li>
-        <li class="nav-item" style="cursor: pointer">
-          <a class="nav-link" href="/admin/login">Login</a>
-        </li>
-      </ul>
-    </div>
+  <% if(!member) { %>
+  <div class="navigation-menu">
+    <ul class="nav justify-content-center">
+      <li class="nav-item" style="cursor: pointer">
+        <a class="nav-link active" href="/admin/">Home</a>
+      </li>
+      <li class="nav-item" style="cursor: pointer">
 
-    <div class="users-frame" style="color: #dddddd">
-      <div class="board" style="font-size: 40px">Please login first!</div>
-    </div>
+      </li>
+      <li class="nav-item" style="cursor: pointer">
+        <a class="nav-link" href="/admin/login">Login</a>
+      </li>
+    </ul>
+  </div>
 
-    <% } else { %>
-    <div class="navigation-menu">
-      <ul class="nav justify-content-center">
-        <li class="nav-item" style="cursor: pointer">
-          <a class="nav-link active" href="/admin/">Home</a>
-        </li>
-        <li class="nav-item" style="cursor: pointer">
-          <a class="nav-link" href="/admin/product/all">Menu</a>
-        </li>
-        <li class="nav-item" style="cursor: pointer">
-          <a class="nav-link" href="/admin/user/all">Users</a>
-        </li>
-        <li
-          class="nav-item"
-          style="cursor: pointer"
-          onclick="return confirm('Do you really want to logout?')"
-        >
-          <a class="nav-link" href="/admin/logout">Logout</a>
-        </li>
-      </ul>
-    </div>
+  <div class="users-frame" style="color: var(--steel)">
+    <div class="board" style="font-size: 32px">Please login first!</div>
+  </div>
 
-    <div class="users-frame">
-      <div class="board">
-        <div class="user-table">
-          <span class="header-name" style="margin-bottom: 30px"
-            >All Users List</span
-          >
-          <table class="table table-hover table-sm">
-            <thead class="thead-light">
-              <tr class="thead-light">
-                <th scope="col">No</th>
-                <th scope="col">Name</th>
-                <th scope="col">Phone</th>
-                <th scope="col">Status</th>
-              </tr>
-            </thead>
-              <% users.map(function (value, index) { %>
-                <tbody style="background: white">
-              <td> <%= index + 1 %> </td>
-              <td> <%= value.memberNick %> </td>
-              <td> <%= value.memberPhone %> </td>
-              <td style="width: 13%">
-                <select class="spec-select member-status" id="<%= value._id %>">
-                  <option value="ACTIVE" <%= value.memberStatus === 'ACTIVE' ? 'selected': '' %> >ACTIVE</option>
-                  <option value="BLOCK" <%= value.memberStatus === 'BLOCK' ? 'selected': '' %> >BLOCK</option>
-                  <option value="DELETE" <%= value.memberStatus === 'DELETE' ? 'selected': '' %> >DELETE</option>
-                </select>
-              </td>
-            </tbody>
-              <% }) %>
-            
-          </table>
+  <% } else { %>
+  <% const avatarColors = ['#3D6BFF', '#1DAE73', '#7C8894', '#FF9F1C', '#8B7CE8', '#E24B4A']; %>
+
+  <div class="admin-topbar">
+    <div class="admin-topbar-inner">
+      <div class="admin-brand">
+       <div class="admin-logo-box">
+          <img src="/img/logo.png" alt="TechHome logo" class="admin-logo-img">
+        </div>
+        TechHome
+      </div>
+      <div class="admin-nav-links">
+        <a href="/admin/">Home</a>
+        <a href="/admin/product/all">Products</a>
+        <a class="active" href="/admin/user/all">Users</a>
+        <form action="/admin/logout" method="POST"><input type="hidden" name="_csrf" value="<%= csrfToken %>" /><button type="submit" class="nav-link admin-logout">Logout</button></form>
+      </div>
+      <div class="admin-avatar"><%= member.memberNick ? member.memberNick.substring(0,2).toUpperCase() : 'AD' %></div>
+    </div>
+  </div>
+
+  <div class="users-frame">
+    <div class="board">
+      <div class="section-eyebrow">CUSTOMERS</div>
+      <div class="user-table">
+        <span class="header-name">All customers</span>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-label"><span class="stat-dot" style="background:var(--accent-blue)"></span>Total customers</div>
+            <div class="stat-value" id="stat-total"><%= total %></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><span class="stat-dot" style="background:var(--accent-green)"></span>Active</div>
+            <div class="stat-value" id="stat-active"><%= activeCount %></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><span class="stat-dot" style="background:var(--accent-amber)"></span>Blocked</div>
+            <div class="stat-value" id="stat-blocked"><%= blockedCount %></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><span class="stat-dot" style="background:var(--accent-red)"></span>Deleted</div>
+            <div class="stat-value" id="stat-deleted"><%= deletedCount %></div>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="search-box">
+            <input type="text" id="user-search" placeholder="Search customers..." />
+          </div>
+        </div>
+
+        <table class="table table-hover table-sm techhome-table" id="users-table">
+          <thead class="thead-light">
+            <tr>
+              <th scope="col">No</th>
+              <th scope="col">Name</th>
+              <th scope="col">Phone</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <% users.map(function (value, index) { %>
+          <tbody class="user-row" data-name="<%= value.memberNick.toLowerCase() %>">
+            <td><%= index + 1 %></td>
+            <td>
+              <div class="name-cell">
+                <span class="avatar-circle" style="background:<%= avatarColors[index % avatarColors.length] %>">
+                  <%= value.memberNick.charAt(0).toUpperCase() %>
+                </span>
+                <b><%= value.memberNick %></b>
+              </div>
+            </td>
+            <td><%= value.memberPhone %></td>
+            <td style="width: 15%">
+              <select class="spec-select status-pill member-status" data-status="<%= value.memberStatus %>" id="<%= value._id %>">
+                <option value="ACTIVE" <%= value.memberStatus === 'ACTIVE' ? 'selected': '' %>>ACTIVE</option>
+                <option value="BLOCK" <%= value.memberStatus === 'BLOCK' ? 'selected': '' %>>BLOCK</option>
+                <option value="DELETE" <%= value.memberStatus === 'DELETE' ? 'selected': '' %>>DELETE</option>
+              </select>
+            </td>
+          </tbody>
+          <% }) %>
+        </table>
+
+        <div class="table-foot">
+          <span class="showing-text">Showing 1–<%= total %> of <%= total %> customers</span>
+          <div class="pagination-controls">
+            <button class="page-arrow" disabled>&lsaquo;</button>
+            <button class="page-num active">1</button>
+            <button class="page-arrow" disabled>&rsaquo;</button>
+          </div>
         </div>
       </div>
     </div>
-    <% } %>
   </div>
+  <% } %>
 
   <script type="text/javascript" src="/js/users.js"></script>
 </body>

@@ -1,7 +1,8 @@
+import type { View } from "../libs/types/view";
 import mongoose, {Schema} from "mongoose";
 import { ViewGroup } from "../libs/enums/view.enum";
 
-const viewSchema = new Schema(
+const viewSchema = new Schema<View>(
   {
     viewGroup: {
       type: String,
@@ -23,4 +24,4 @@ const viewSchema = new Schema(
   { timestamps: true}
 );
 
-export default mongoose.model("view", viewSchema);
+export default mongoose.model<View>("view", viewSchema);

@@ -1,17 +1,15 @@
-console.log("Home frontend javascript file");
-
 function fitElementToParent(el, padding) {
   let timeout = null;
 
   function resize() {
     if (timeout) clearTimeout(timeout);
     anime.set(el, { scale: 1 });
-    let pad = padding || 0,
+    const pad = padding || 0,
      parentEl = el.parentNode,
      elOffsetWidth = el.offsetWidth - pad,
      parentOffsetWidth = parentEl.offsetWidth,
      ratio = parentOffsetWidth / elOffsetWidth;
-    timeout = setTimeout(anime.set(el, { scale: ratio }), 10);
+    timeout = setTimeout(() => anime.set(el, { scale: ratio }), 10);
   }
 
   resize();
@@ -19,10 +17,12 @@ function fitElementToParent(el, padding) {
 }
 
 (function () {
-  const sphereEl = document.querySelector(".sphere-animation"),
-   spherePathEls = sphereEl.querySelectorAll(".sphere path"),
+  const sphereEl = document.querySelector(".sphere-animation");
+  if (!sphereEl) return;
+
+  const spherePathEls = sphereEl.querySelectorAll(".sphere path"),
    pathLength = spherePathEls.length,
-  const animations = [];
+   animations = [];
 
   fitElementToParent(sphereEl);
 
@@ -33,7 +33,7 @@ function fitElementToParent(el, padding) {
           anime({
             targets: spherePathEls[i],
             stroke: {
-              value: ["rgba(255,75,75,1)", "rgba(80,80,80,.35)"],
+              value: ["rgba(61,107,255,1)", "rgba(80,80,80,.35)"],
               duration: 500,
             },
             translateX: [2, -4],

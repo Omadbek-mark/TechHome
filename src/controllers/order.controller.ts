@@ -1,59 +1,28 @@
-import Errors, { HttpCode } from "../libs/Errors";
-import { T } from "../libs/types/common";
-import { ExtendedRequest } from "../libs/types/member";
 import { Response } from 'express';
-import OrderService from "../models/Order.service";
-import { OrderInquiry, OrderUpdateInput } from "../libs/types/order";
-import { OrderStatus } from "../libs/enums/order.enum";
+import { T } from '../libs/types/common';
+import { ExtendedRequest } from '../libs/types/member';
+import OrderService, { orderResponse } from '../models/Order.service';
+import { orderInquiry } from '../libs/order/checkout';
+import { sendError } from '../libs/security/http';
 
-const orderService = new OrderService();
-
-const orderController: T = {};
-orderController.createOrder = async (req: ExtendedRequest, res: Response) => {
+const service = new OrderService();
+const controller: T = {};
+controller.createOrder = async (req: ExtendedRequest, res: Response) => {
   try {
-    console.log("createOrder");
-    const result = await orderService.createOrder(req.member, req.body);
-    
-    res.status(HttpCode.CREATED).json(result);
-  } catch (err) {
-    console.log("Error, createOrder:", err);
-    if (err instanceof Errors) res.status(err.code).json(err);
-    else res.status(Errors.standard.code).json(Errors.standard);
-  }
+    const result = await service.createOrder(req.member, req.body, req.get('Idempotency-Key'));
+    res.set('Cache-Control', 'no-store').status(201).json(orderResponse(result));
+  } catch (error) { sendError(res, error); }
 };
-
-orderController.getMyOrders = async (req: ExtendedRequest, res: Response) => {
+controller.getMyOrders = async (req: ExtendedRequest, res: Response) => {
   try {
-    console.log("getMyOrders");
-    const { page, limit, orderStatus } = req.query;
-    const inquiry: OrderInquiry = {
-      page: Number(page),
-      limit: Number(limit),
-      orderStatus: orderStatus as OrderStatus,
-    };
-    console.log("inquiry:", inquiry);
-    const result = await orderService.getMyOrders(req.member, inquiry);
-    
-    res.status(HttpCode.CREATED).json(result);
-  } catch (err) {
-    console.log("Error, getMyOrders:", err);
-    if (err instanceof Errors) res.status(err.code).json(err);
-    else res.status(Errors.standard.code).json(Errors.standard);
-  }
+    const result = await service.getMyOrders(req.member, orderInquiry(req.query));
+    res.set('Cache-Control', 'no-store').json(result.map(orderResponse));
+  } catch (error) { sendError(res, error); }
 };
-
-orderController.updateOrder = async (req: ExtendedRequest, res: Response) => {
+controller.updateOrder = async (req: ExtendedRequest, res: Response) => {
   try {
-    console.log("updateOrder");
-    const input: OrderUpdateInput = req.body;
-    const result = await orderService.updateOrder(req.member, input);
-
-    res.status(HttpCode.CREATED).json(result);
-  } catch (err) {
-    console.log("Error, updateOrder:", err);
-    if (err instanceof Errors) res.status(err.code).json(err);
-    else res.status(Errors.standard.code).json(Errors.standard);
-  }
+    const result = await service.updateOrder(req.member, req.body);
+    res.set('Cache-Control', 'no-store').json(orderResponse(result));
+  } catch (error) { sendError(res, error); }
 };
-
-export default orderController;
+export default controller;

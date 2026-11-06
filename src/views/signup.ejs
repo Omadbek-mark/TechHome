@@ -1,112 +1,41 @@
 <%- include('includes/header') %>
 
-<link rel="stylesheet" type="text/css" href="/css/signup.css" />
+<link rel="stylesheet" type="text/css" href="/css/login.css" />
 
 <body>
-  <div class="signup-container">
-    <form 
-    onsubmit="return validateSignupForm()"
-    action="/admin/signup" 
-    method="POST" 
-    enctype="multipart/form-data">
-      <div class="signup-frame" style="width: 650px">
-        <div class="signup-top">
-          <span>Signup</span>
-          <div>Go back <a href="/admin" style="color: #6440fb">Home</a></div>
-          <p>
-            Already signed up?
-            <a href="/admin/login" style="color: #6440fb">Login</a>
-          </p>
-        </div>
-
-        <div class="sign-input-frame" style="justify-content: space-between">
-          <div class="sign-up-frame">
-            <label>Restaurant *</label>
-            <input
-              type="text"
-              name="memberNick"
-              class="member-nick"
-              placeholder="Username"
-              value=""
-            />
-          </div>
-          <div class="sign-up-frame">
-            <label>Phone *</label>
-            <input
-              type="text"
-              name="memberPhone"
-              class="member-phone"
-              placeholder="Phone"
-              value=""
-            />
-          </div>
-        </div>
-        <div class="sign-input-frame" style="justify-content: space-between">
-          <div class="sign-up-frame">
-            <label>Password *</label>
-            <input
-              type="password"
-              name="memberPassword"
-              class="member-password"
-              placeholder="Password"
-              value=""
-            />
-          </div>
-          <div class="sign-up-frame">
-            <label>Repeat password *</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              class="confirm-password"
-              placeholder="Repeat password"
-              value=""
-            />
-          </div>
-        </div>
-
-        <div class="signup-input-frame">
-          <div class="media-frame">
-            <img class="upload-img-frame" src="/img/default.jpeg" />
-            <div class="upload-container">
-              <span class="media-text">Product image</span>
-              <div
-                class="file-box bs3-primary preview-image"
-                style="margin-top: 25px; display: flex"
-              >
-                <input
-                  class="upload-name"
-                  value="Choose image"
-                  disabled="disabled"
-                />
-                <label for="input-file" class="file-input-label"
-                  >Upload Image</label
-                >
-                <input
-                  type="file"
-                  id="input-file"
-                  class="upload-hidden form-control-file member-image"
-                  name="memberImage"
-                />
-              </div>
-              <p class="thumbnail-desc">
-                Please upload restaurant image.<br />
-                Attention only:.jpg, .jpeg, or .png. <br />
-                formats allowed!
-              </p>
+  <div class="login-container">
+    <div class="login-frame">
+      <div class="login-top">
+        <span>Sign up</span>
+        <div><a href="/admin">Home</a> · <a href="/admin/login">Login</a></div>
+        <% if (message) { %><p role="status"><%= message %></p><% } %>
+      </div>
+      <% if (showForm) { %>
+        <form action="/admin/signup" method="POST">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <div class="login-input-frame">
+            <div class="login-input-container">
+              <label for="signup-nick">Store username</label>
+              <input id="signup-nick" name="memberNick" autocomplete="username" required />
+            </div>
+            <div class="login-input-container">
+              <label for="signup-phone">Phone</label>
+              <input id="signup-phone" name="memberPhone" type="tel" autocomplete="tel" required />
+            </div>
+            <div class="login-input-container">
+              <label for="signup-password">Password</label>
+              <input id="signup-password" name="memberPassword" type="password" autocomplete="new-password" required />
+            </div>
+            <div class="login-input-container">
+              <label for="signup-code">Setup code</label>
+              <input id="signup-code" name="setupCode" type="password" autocomplete="off" required />
             </div>
           </div>
-        </div>
-
-        <input name="memberType" value="RESTAURANT" hidden />
-
-        <button class="signup-btn btn" name="signup" type="submit">
-          Signup
-        </button>
-      </div>
-    </form>
+          <button class="login-btn btn" type="submit">Sign up</button>
+        </form>
+      <% } %>
+    </div>
   </div>
-
-  <script type="text/javascript" src="/js/signup.js"></script>
 </body>
 
 <%- include('includes/footer') %>

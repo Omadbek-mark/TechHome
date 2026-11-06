@@ -10,16 +10,17 @@
         <li class="nav-item" style="cursor: pointer">
           <a class="nav-link active" href="/admin">Home</a>
         </li>
+        <li class="nav-item"><a class="nav-link" href="/admin/signup">Sign up</a></li>
         <% if(!member) { %>
         <li class="nav-item" style="cursor: pointer">
-          <a class="nav-link" href="/admin/signup">Signup</a>
+
         </li>
         <li class="nav-item" style="cursor: pointer">
           <a class="nav-link" href="/admin/login">Login</a>
         </li>
         <% } else { %>
         <li class="nav-item" style="cursor: pointer">
-          <a class="nav-link" href="/admin/product/all">Menu</a>
+          <a class="nav-link" href="/admin/product/all">Products</a>
         </li>
         <li class="nav-item" style="cursor: pointer">
           <a class="nav-link" href="/admin/user/all">Users</a>
@@ -29,7 +30,7 @@
           style="cursor: pointer"
           onclick="return confirm('Do you want to logout?')"
         >
-          <a class="nav-link" href="/admin/logout">Logout</a>
+          <form action="/admin/logout" method="POST"><input type="hidden" name="_csrf" value="<%= csrfToken %>" /><button type="submit" class="nav-link admin-logout">Logout</button></form>
         </li>
         <% } %>
       </ul>
@@ -117,6 +118,7 @@
             />
           </svg>
         </div>
+        <div class="home-caption">TechHome <span>Admin</span></div>
       </div>
     </div>
   </div>

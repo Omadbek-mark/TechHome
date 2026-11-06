@@ -2,42 +2,35 @@ import { AUTH_TIMER } from "../libs/config";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import { Member } from "../libs/types/member";
 import jwt from "jsonwebtoken";
+import MemberService from "./Member.service";
 
 class AuthService {
-  private readonly secretToken;
+  private readonly memberService = new MemberService();
 
-  constructor() { 
-    this.secretToken = process.env.SECRET_TOKEN as string;
+  private secret(): string {
+    const secret = process.env.SECRET_TOKEN;
+    if (!secret || secret.length < 32) throw new Error("SECRET_TOKEN must contain at least 32 characters.");
+    return secret;
   }
-  
-  public async createToken(payload: Member) {
-    return new Promise((resolve, reject) => {
-      const duration = `${AUTH_TIMER}h`;
-      jwt.sign(
-        payload,
-        process.env.SECRET_TOKEN as string,
-        {
-          expiresIn: duration
-        },
-        (err, token) => {
-          if (err)
-            reject(new Errors(HttpCode.UNAUTHORIZED, Message.TOKEN_CREATION_FAILED)
-            );
-          else resolve(token as string);
-        }
-      );
+
+  public async createToken(member: Member): Promise<string> {
+    return jwt.sign({ version: member.authVersion ?? 0 }, this.secret(), {
+      subject: String(member._id), algorithm: "HS256", expiresIn: AUTH_TIMER * 3600,
+      issuer: "techhome", audience: "techhome-web",
     });
   }
 
-
   public async checkAuth(token: string): Promise<Member> {
-    const result = (await jwt.verify(
-      token,
-      this.secretToken
-    )) as Member;
-    console.log(`--- [AUTH] memberNick: ${result.memberNick} ---`);
-    return result;
+    let claims: jwt.JwtPayload;
+    try {
+      const result = jwt.verify(token, this.secret(), { algorithms: ["HS256"], issuer: "techhome", audience: "techhome-web" });
+      if (typeof result === 'string' || typeof result.sub !== 'string' || !Number.isInteger(result.version)) throw new Error('Invalid claims');
+      claims = result;
+    } catch {
+      throw new Errors(HttpCode.UNAUTHORIZED, Message.NOT_AUTHENTICATED);
+    }
+    // Read current role/status/version, never trust a cached JWT role.
+    return this.memberService.getAuthenticatedMember(claims.sub!, claims.version);
   }
 }
-
 export default AuthService;
