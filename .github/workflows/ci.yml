@@ -20,3 +20,25 @@ jobs:
       - run: npm test
       - run: docker build -t techhome-backend:ci .
       - run: docker run --rm --entrypoint node techhome-backend:ci --check dist/server.js
+
+  deploy:
+    needs: verify
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/master' &&
+      vars.AUTO_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 40
+    environment: production
+    concurrency:
+      group: production-deploy
+      cancel-in-progress: false
+    env:
+      COOLIFY_URL: https://coolify.oasisspace.org
+      COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+      APP_UUID: xvxlzpnvokbvkyfcbd17stdv
+      SMOKE_URL: https://api.techhome.uz/ready
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy verified commit and check production health
+        run: bash .github/scripts/coolify-deploy.sh
